@@ -1,4 +1,7 @@
 mutable struct red
+    #= TODO: cambiar la estructura de red a un conjunto de vértices y diccionarios que llleven de pares ordenados (aristas) a una lista
+    que incluya la velocidad maxima en la arista, la distancia, el numero de carriles y el nùmero de autos en cada arista =#
+
     n::Int32 #número de vértices
     m::Int64 #número de aristas
     vecinos::Array{Array{Int32,1},1} #estructura de red, quién está conectado con quién
@@ -28,6 +31,7 @@ mutable struct red
 end
 
 mutable struct autos
+    #= TODO: cambiar el conjunto de todos los autos por constructor de ojbetos tipo auto =#
     
     N::Int32 ##Número de autos, del orden de 5 millones
     arista::Array{Int64,2}
@@ -71,3 +75,9 @@ mutable struct autos
         new(N,arista,avance,TS,PV,Vel,TR,p_final,ruta_animacion,t_propio,sd)
     end
 end
+
+#= TODO: Hacer funciones de creación automática de:
+    - Varios autos con ciertas caracterísitcas
+    - Redes cuadradas de nXn
+    - Redes cuadradas de nxn con k diagonales
+    - Redes aleatorias =#

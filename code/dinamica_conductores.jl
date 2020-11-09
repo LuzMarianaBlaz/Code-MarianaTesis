@@ -3,9 +3,10 @@ function BPR(tmin_ij::Float32, f_ij::Int16 ,p_ij::Float32, α::Float64 = 0.2, β
     return t
 end
 
-#en vez de recalcular identifica quiénes son tmin fij pij, calculamos desde la red
 
-#El plan inicial de viaje de todos es el otorgado por el algoritmo de Dijkstra, cada auto necesita su pareja OD
+#TODO: El plan inicial de viaje de todos es el otorgado por el algoritmo de Dijkstra, cada auto necesita su pareja OD, incluir
+# aquí el algoritmo A*, en vez de recalcular identifica quiénes son tmin fij pij, calculamos desde la red con HASHING en los mapeos de aristas
+
 function Planes_de_viaje(Red::red,pares_OD::Array{Int32,2})
     PV = []
     for i in 1:length(pares_OD[:,1])

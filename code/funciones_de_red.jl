@@ -7,6 +7,7 @@ function Distance(ϕ1::Float64,λ1::Float64,ϕ2::Float64,λ2::Float64)
 end
 
 function Dijkstra(x1::Int32, x2::Int32, Red::red)
+    #= TODO: Cambiar la función para que utilice Hashing (diccionarios) y priority queues para los vértices =#
     ∞ = Inf
     #### PASO 1  ####
     Distancias_x1 = zeros(Red.n)
@@ -84,3 +85,7 @@ function Dijkstra(x1::Int32, x2::Int32, Red::red)
     return Distancias_x1[Int(x2)], Ruta[x2]
 end    
 
+#= TODO :
+    - Implementar la función de heurística de la distancia faltante estimada
+    - implementar el algoritmo A* modificado
+    =#
