@@ -1,4 +1,4 @@
-from . import redes
+import redes
 
 if __name__ == '__main__':
 
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     r.agrega_arista('e,d', 5., 7., 2)
 
     for v in r.nodos:
-        print(r.nodos[v].vecinos)
+        print(v,r.nodos[v].vecinos)
 
     for par in r.aristas:
-        print(r.aristas[par].capacidad)
+        print(par, r.aristas[par].capacidad)
