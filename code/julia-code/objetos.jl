@@ -1,3 +1,5 @@
+
+
 mutable struct red
     #= TODO: cambiar la estructura de red a un conjunto de vértices y diccionarios que lleven de pares ordenados (aristas) a una lista
     que incluya la velocidad maxima en la arista, la distancia, el numero de carriles y el nùmero de autos en cada arista =#
