@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class Nodo:
     def __init__(self, nodo):
         self.id = nodo
@@ -61,3 +64,15 @@ class Red:
             return self.aristas[par_ordenado]
         else: 
             return None
+
+def genera_red_cuadrada(n_lado, max_vel_dist, long_dist, cap_dist):
+    rc = Red()
+    n = int(n_lado **2)
+    m = int(2*n_lado**2-2*n_lado)
+    max_vel = np.random.normal(max_vel_dist[0],max_vel_dist[1], m)
+    longitudes = np.random.normal(long_dist[0],long_dist[1], m)
+    cap = np.random.normal(cap_dist[0],cap_dist[1], m)
+    for i in range(n_lado**2):
+        rc.agrega_vertice(str(i))
+
+
