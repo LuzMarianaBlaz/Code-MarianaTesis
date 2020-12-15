@@ -1,11 +1,11 @@
 mutable struct red
-    #= TODO: cambiar la estructura de red a un conjunto de vértices y diccionarios que llleven de pares ordenados (aristas) a una lista
+    #= TODO: cambiar la estructura de red a un conjunto de vértices y diccionarios que lleven de pares ordenados (aristas) a una lista
     que incluya la velocidad maxima en la arista, la distancia, el numero de carriles y el nùmero de autos en cada arista =#
 
     n::Int32 #número de vértices
     m::Int64 #número de aristas
     vecinos::Array{Array{Int32,1},1} #estructura de red, quién está conectado con quién
-    t_min::Array{Array{Float32,1},1} #los tiempos mínimos (a velocidad máxima) de la arista correspondiente
+    t_min::Array{Array{Float32,1},1} #los tiempos mínimos de la arista correspondiente
     distancias::Array{Array{Float32,1},1} # la longitud de calle de la arista correspondiente
     capacidad::Array{Array{Float32,1},1} #la capacidad de la arista correspondiente (el número de autos que caben)
     en_arista::Array{Array{Int16,1},1}#cuántos autos hay en cada arista
@@ -80,4 +80,4 @@ end
     - Varios autos con ciertas caracterísitcas
     - Redes cuadradas de nXn
     - Redes cuadradas de nxn con k diagonales
-    - Redes aleatorias =#
+    - Redes aleatorias =#]
