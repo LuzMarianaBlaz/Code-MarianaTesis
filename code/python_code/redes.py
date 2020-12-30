@@ -13,7 +13,7 @@ class Nodo:
 
 class Arista:
     def __init__(self,par_ordenado, max_vel, longitud, capacidad):
-        self.nodos = par_ordenado.split(',')
+        self.nodos = par_ordenado.split(',') 
         self.max_vel = max_vel
         self.longitud = longitud
         self.capacidad = capacidad
@@ -75,19 +75,20 @@ def genera_red_cuadrada(n_lado, max_vel_dist, long_dist, cap_dist):
 
     pares = []
     for i in range(n):
-        vecinos_i = [i-1, i+1, i+n_lado, i-n_lado]
 
-        if i < n_lado:
-            vecinos_i.remove(i-n_lado)
+        vecinos_i = []
+
+        if i >= n_lado:
+            vecinos_i.append(i+n_lado)
             
-        if i >= n_lado*(n_lado-1):
-            vecinos_i.remove(i+n_lado) 
+        if i < n_lado*(n_lado-1):
+            vecinos_i.append(i-n_lado) 
 
-        if i%n_lado == 0:
-            vecinos_i.remove(i-1)
+        if i%n_lado > 0:
+            vecinos_i.append(i+1)
 
-        if i%n_lado == n_lado - 1:
-            vecinos_i.remove(i+1)
+        if i%n_lado < n_lado - 1:
+            vecinos_i.append(i-1)
 
         for vec in vecinos_i:
             pares.append(str(i)+','+str(vec))
