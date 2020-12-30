@@ -79,16 +79,16 @@ def genera_red_cuadrada(n_lado, max_vel_dist, long_dist, cap_dist):
         vecinos_i = []
 
         if i >= n_lado:
-            vecinos_i.append(i+n_lado)
+            vecinos_i.append(i-n_lado)
             
         if i < n_lado*(n_lado-1):
-            vecinos_i.append(i-n_lado) 
+            vecinos_i.append(i+n_lado) 
 
         if i%n_lado > 0:
-            vecinos_i.append(i+1)
+            vecinos_i.append(i-1)
 
         if i%n_lado < n_lado - 1:
-            vecinos_i.append(i-1)
+            vecinos_i.append(i+1)
 
         for vec in vecinos_i:
             pares.append(str(i)+','+str(vec))
