@@ -1,6 +1,7 @@
 from . import redes
-#Algoritmo A* normal
+import heapq
 
+#Objetos a utilizarse en el árbol de búsqueda
 class Tree_node:
 
     def __init__(self, node_id, parent):
@@ -10,7 +11,7 @@ class Tree_node:
         self.costo_futuro = 0.
         self.costo_total = 0.
 
-        # comparacion de nodos
+    # comparacion de nodos
     def __eq__(self, other):
         return self.node_id == other.node_id
     
@@ -19,7 +20,7 @@ class Tree_node:
         return self.costo_total < other.costo_total
 
 
-
+#Algoritmo A* clásico
 def A_star(red,heuristica,origen,destino):
     #Paso 1: Genera los conjuntos abierto y cerrado
     abierto = []
@@ -31,40 +32,57 @@ def A_star(red,heuristica,origen,destino):
 
     #Paso 3: Agrega el nodo inicio al conjunto abierto
     abierto.append(inicial)
+    heapq.heapify(abierto) #abierto se vuelve un binary heap, siempre que hagamos 
+    #las operaciones adecuadas podremos asegurar que el primer elemento es de menor costo calculado
 
     #Paso 4: Mientras haya elementos en abierto:
     while len(open) > 0:
-        #4.1 Ordena los nodos de menor a mayor costo
-        abierto.sort()
-        #4.2 Pone al nodo de menor costo en el conjunto cerrado
-        nodo_actual = abierto.pop(0)
+
+        #4.1 Pone al nodo de menor costo en el conjunto cerrado
+        nodo_actual = heapq.heappop(abierto)
         cerrado.append(nodo_actual)
-        #4.3 Si el nodo es el destino, construye el camino y lo devuelve
+
+        #4.2 Si el nodo es el destino, construye el camino y lo devuelve
         if nodo_actual == final:
-            return construye_camino()
-        #4.4 Si no es el destino, se requiere la lista de vecinos
+            return construye_camino(nodo_actual, inicial)
+
+        #4.3 Si no es el destino, se requiere la lista de vecinos
         vecinos = red.consigue_nodo(nodo_actual.node_id).vecinos
+
         #Para cada vecino:
         for vecino in vecinos:
             vec = Tree_node(vecino.id, nodo_actual)
-
-            ##4.4.1 Revisa si está en el conjunto cerrado y si es así lo ignora
-            if vec in cerrado:
-                pass
-            ##4.4.2 Calcula el costo del camino pasando por ese nodo
-            vec.pre_costo = nodo_actual.pre_costo + costo_arista
-            vec.costo_futuro = heuristica(vec,destino)
+            vec.pre_costo = nodo_actual.pre_costo + red.consigue_arista(str(nodo_actual.node_id)+str(vec.node_id)).costo
+            vec.costo_futuro = heuristica(vec)
             vec.costo_total = vec.pre_costo + vec.costo_futuro
-
-            ##4.4.3 Revisa si el vecino está en el conjunto abierto y si es así revisa si mejor al costo
-            ##4.4.4 Si no estaba en el abierto, o si estaba pero el costo mejoró se pone en el abierto
+            mejora(vec, abierto, cerrado)
 
     #5. Si el abierto queda vacío y no se encuentra un camino se regresa None
     return None
 
 
-##TODO: Método construye_camino, metodo costo arista
-def construye_camino():
-    return None
-def costo_arista():
-    return 0.
+## Método construye_camino
+def construye_camino(nodo, nodo_origen):
+    camino = [nodo.node_id]
+    while nodo.parent != nodo_origen:
+        nodo = nodo.parent
+        camino.append(nodo.node_id)
+    camino.append(nodo_origen.node_id)
+    return camino[::-1]
+
+
+
+
+
+
+
+def mejora(vecino, abierto, cerrado):
+    for node in abierto:
+        if (vecino == node) and (vecino.pre_costo < node.pre_costo):
+            node.pre_costo = vecino.pre_costo
+            node.costo_total = node.pre_costo + node.costo_futuro
+            node.parent = vecino.parent
+            return
+    for node in cerrado:
+        print('A')
+    return
