@@ -90,4 +90,9 @@ def mejora(vecino, abierto, cerrado):
     heapq.heappush(abierto,vecino)
     return
 
-#TODO: Definir algunas heurísticas
+# TODO: Definir algunas heurísticas
+
+## TODO: Modificar el algoritmo con lo siguiente:
+# - no hay reapertura de nodos
+# - la heurística depende de la memoria de los conductores y la distancia euclideana
+# - si hay una mejora el avance es inmediato en vez de revisar todos los posibles vecinos
