@@ -26,6 +26,11 @@ class Arista:
     def quita_auto(self):
         self.num_autos -= 1
 
+    def costo(self):
+        alpha = 0.2
+        beta = 10.
+        return self.t_min * (1+alpha*(self.num_autos/self.capacidad)**beta)
+
 class Red:
     def __init__(self):
         self.nodos = {}
