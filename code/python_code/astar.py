@@ -32,11 +32,10 @@ def A_star(red,heuristica,origen,destino):
 
     #Paso 3: Agrega el nodo inicio al conjunto abierto
     abierto.append(inicial)
-    heapq.heapify(abierto) #abierto se vuelve un binary heap, siempre que hagamos 
-    #las operaciones adecuadas podremos asegurar que el primer elemento es de menor costo calculado
+    heapq.heapify(abierto) #abierto se vuelve un binary heap
 
     #Paso 4: Mientras haya elementos en abierto:
-    while len(open) > 0:
+    while len(abierto) > 0:
 
         #4.1 Pone al nodo de menor costo en el conjunto cerrado
         nodo_actual = heapq.heappop(abierto)
@@ -52,8 +51,8 @@ def A_star(red,heuristica,origen,destino):
         #Para cada vecino:
         for vecino in vecinos:
             vec = Tree_node(vecino.id, nodo_actual)
-            vec.pre_costo = nodo_actual.pre_costo + red.consigue_arista(str(nodo_actual.node_id)+str(vec.node_id)).costo
-            vec.costo_futuro = heuristica(vec)
+            vec.pre_costo = nodo_actual.pre_costo + red.consigue_arista(str(nodo_actual.node_id)+','+str(vec.node_id)).costo
+            vec.costo_futuro = heuristica(vec, final)
             vec.costo_total = vec.pre_costo + vec.costo_futuro
             mejora(vec, abierto, cerrado)
 
@@ -70,19 +69,25 @@ def construye_camino(nodo, nodo_origen):
     camino.append(nodo_origen.node_id)
     return camino[::-1]
 
-
-
-
-
-
-
+## Método mejora
 def mejora(vecino, abierto, cerrado):
     for node in abierto:
         if (vecino == node) and (vecino.pre_costo < node.pre_costo):
             node.pre_costo = vecino.pre_costo
             node.costo_total = node.pre_costo + node.costo_futuro
             node.parent = vecino.parent
+            heapq.heapify(abierto)
             return
     for node in cerrado:
-        print('A')
+        if (vecino == node) and (vecino.pre_costo < node.pre_costo):
+            node.pre_costo = vecino.pre_costo
+            node.costo_total = node.pre_costo + node.costo_futuro
+            node.parent = vecino.parent
+            cerrado.remove(node)
+            heapq.heappush(abierto,node)
+            return
+    
+    heapq.heappush(abierto,vecino)
     return
+
+#TODO: Definir algunas heurísticas
