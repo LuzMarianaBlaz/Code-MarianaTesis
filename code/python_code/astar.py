@@ -120,6 +120,8 @@ def mejora(edo_vecino:Tree_node, abierto:list, cerrado:list):
 
 # TODO: Definir algunas heurísticas
 
+# TODO: Pruebas del algoritmo base
+
 ## TODO: Modificar el algoritmo con lo siguiente:
 # - no hay reapertura de nodos
 # - la heurística depende de la memoria de los conductores y la distancia euclideana
