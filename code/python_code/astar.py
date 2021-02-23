@@ -1,4 +1,4 @@
-from . import redes
+from .redes import Red
 import heapq
 
 #Objetos a utilizarse en el árbol de búsqueda
@@ -19,8 +19,6 @@ class Tree_node:
         self.pre_costo = 0.
         self.costo_futuro = 0.
         self.costo_total = 0.
-
-    # comparacion de nodos
     
     def __eq__(self, other):
         """
@@ -28,7 +26,6 @@ class Tree_node:
         """
         return self.node_id == other.node_id
     
-    # comparacion de costos 
     def __lt__(self,other):
         """
         revisa si el costo del nodo es menor que el costo de other.
@@ -37,40 +34,42 @@ class Tree_node:
 
 
 #Algoritmo A* clásico
-def A_star(red,heuristica,origen,destino):
+def A_star(red:Red,heuristica,origen:str,destino:str):
     #Paso 1: Genera los conjuntos abierto y cerrado
     abierto = []
     cerrado = []
 
     #Paso 2: Creación de un nodo final y un nodo inicial
-    inicial = Tree_node(origen,None) #no tiene nodo padre pues es la raiz del arbol de busqueda
-    final = Tree_node(destino, None) #aun no sabemos el padre
+    edo_inicial = Tree_node(origen,None) #no tiene nodo padre pues es la raiz del arbol de busqueda
+    edo_final = Tree_node(destino, None) #aun no sabemos el padre
 
     #Paso 3: Agrega el nodo inicio al conjunto abierto
-    abierto.append(inicial)
+    abierto.append(edo_inicial)
     heapq.heapify(abierto) #abierto se vuelve un binary heap
 
     #Paso 4: Mientras haya elementos en abierto:
     while len(abierto) > 0:
 
         #4.1 Pone al nodo de menor costo en el conjunto cerrado
-        nodo_actual = heapq.heappop(abierto)
-        cerrado.append(nodo_actual)
+        edo_actual = heapq.heappop(abierto)
+        cerrado.append(edo_actual)
 
         #4.2 Si el nodo es el destino, construye el camino y lo devuelve
-        if nodo_actual == final:
-            return construye_camino(nodo_actual, inicial)
+        if edo_actual == edo_final:
+            return construye_camino(edo_actual, edo_inicial)
 
         #4.3 Si no es el destino, se requiere la lista de vecinos
-        vecinos = red.consigue_nodo(nodo_actual.node_id).vecinos
+        nodo_actual = red.nodo_de_id(edo_actual.node_id)
+        if nodo_actual is not None:
+            vecinos = nodo_actual.vecinos
 
         #Para cada vecino:
         for vecino in vecinos:
-            vec = Tree_node(vecino.id, nodo_actual)
-            vec.pre_costo = nodo_actual.pre_costo + red.consigue_arista(str(nodo_actual.node_id)+','+str(vec.node_id)).costo
-            vec.costo_futuro = heuristica(vec, final)
-            vec.costo_total = vec.pre_costo + vec.costo_futuro
-            mejora(vec, abierto, cerrado)
+            edo_vec = Tree_node(vecino.node_id, edo_actual)
+            edo_vec.pre_costo = edo_actual.pre_costo + red.arista_de_id(str(edo_actual.node_id)+','+str(edo_vec.node_id)).costo
+            edo_vec.costo_futuro = heuristica(edo_vec, edo_final)
+            edo_vec.costo_total = edo_vec.pre_costo + edo_vec.costo_futuro
+            mejora(edo_vec, abierto, cerrado)
 
     #5. Si el abierto queda vacío y no se encuentra un camino se regresa None
     return None
@@ -78,6 +77,9 @@ def A_star(red,heuristica,origen,destino):
 
 ## Método construye_camino
 def construye_camino(nodo, nodo_origen):
+    """
+    Devuelve el camino desde el nodo origen hasta el nodo deseado.
+    """
     camino = [nodo.node_id]
     while nodo.parent != nodo_origen:
         nodo = nodo.parent
@@ -86,24 +88,34 @@ def construye_camino(nodo, nodo_origen):
     return camino[::-1]
 
 ## Método mejora
-def mejora(vecino, abierto, cerrado):
-    for node in abierto:
-        if (vecino == node) and (vecino.pre_costo < node.pre_costo):
-            node.pre_costo = vecino.pre_costo
-            node.costo_total = node.pre_costo + node.costo_futuro
-            node.parent = vecino.parent
+def mejora(edo_vecino:Tree_node, abierto:list, cerrado:list):
+    """
+    Si el estado vecino corresponde a un nodo en abierto y el costo mejora
+    se actualiza el valor del pre-costo de dicho estado, así como el nodo padre.
+    Si el estado vecino corresponde a un nodo ya cerrado y el costo mejora
+    se actualiza el valor del pre-costo de dicho estado y el nodo se reabre con 
+    el padre del estado vecino.
+    
+    El estado vecino se agrega al conjunto abierto con su costo y su padre
+    si no se cumple ninguna de las condiciones establecidas arriba.
+    """
+    for edo in abierto:
+        if (edo_vecino == edo) and (edo_vecino.pre_costo < edo.pre_costo):
+            edo.pre_costo = edo_vecino.pre_costo
+            edo.costo_total = edo.pre_costo + edo.costo_futuro
+            edo.parent = edo_vecino.parent
             heapq.heapify(abierto)
             return
-    for node in cerrado:
-        if (vecino == node) and (vecino.pre_costo < node.pre_costo):
-            node.pre_costo = vecino.pre_costo
-            node.costo_total = node.pre_costo + node.costo_futuro
-            node.parent = vecino.parent
-            cerrado.remove(node)
-            heapq.heappush(abierto,node)
+    for edo in cerrado:
+        if (edo_vecino == edo) and (edo_vecino.pre_costo < edo.pre_costo):
+            edo.pre_costo = edo_vecino.pre_costo
+            edo.costo_total = edo.pre_costo + edo.costo_futuro
+            edo.parent = edo_vecino.parent
+            cerrado.remove(edo)
+            heapq.heappush(abierto,edo)
             return
     
-    heapq.heappush(abierto,vecino)
+    heapq.heappush(abierto,edo_vecino)
     return
 
 # TODO: Definir algunas heurísticas
