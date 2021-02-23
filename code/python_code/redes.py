@@ -99,10 +99,10 @@ class Red:
         self.m += 1
         u, v = par_ordenado.split(',')
         if u not in self.nodos:
-            self._agrega_nodo(u)
+            self.agrega_nodo(u)
         if v not in self.nodos:
-            self._agrega_nodo(v)
-        self.nodos[u]._nuevo_vecino(v) 
+            self.agrega_nodo(v)
+        self.nodos[u].nuevo_vecino(v) 
 
         arista = Arista(par_ordenado,max_vel,longitud,capacidad)
         self.aristas[par_ordenado] = arista
