@@ -3,8 +3,17 @@ import heapq
 
 #Objetos a utilizarse en el árbol de búsqueda
 class Tree_node:
+    """
+    Esta clase representa un nodo en el árbol de búsqueda
+    de un algoritmo en gráficas. incluye un node_id, un nodo padre
+    un pre_costo, un costo futuro y un costo total.
+    El pre_costo es el costo de haber llegado hasta dicho nodo, el
+    costo futuro corresponde a una heurística de cuánto más falta para
+    llegar al destino en el algoritmo de búsqueda, el costo total es
+    la suma de ambos costos.
+    """
 
-    def __init__(self, node_id, parent):
+    def __init__(self, node_id: str, parent:Tree_node):
         self.node_id = node_id
         self.parent = parent
         self.pre_costo = 0.
@@ -12,11 +21,18 @@ class Tree_node:
         self.costo_total = 0.
 
     # comparacion de nodos
+    
     def __eq__(self, other):
+        """
+        revisa si dos tree nodes tienen el mismo node_id.
+        """
         return self.node_id == other.node_id
     
     # comparacion de costos 
     def __lt__(self,other):
+        """
+        revisa si el costo del nodo es menor que el costo de other.
+        """
         return self.costo_total < other.costo_total
 
 
