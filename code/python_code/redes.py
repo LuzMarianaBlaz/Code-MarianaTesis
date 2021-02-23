@@ -1,17 +1,37 @@
 import numpy.random as rand
 
 class Nodo:
+    """
+    Genera un nodo, a partir de un nodo_id.
+    Se inicializa con una lista de vecinos vacía e incluye los métodos
+    _nuevo_vecino(vecino_id) y cual_id(self).
+    """
     def __init__(self, nodo_id:str):
         self.id = nodo_id
         self.vecinos = []
 
-    def _nuevo_vecino(self, vecino_id:str):
+    def nuevo_vecino(self, vecino_id:str):
+        """
+        Agrega a vecino_id a la lista de vecinos del nodo.
+        """
         self.vecinos.append(vecino_id)
+        return
     
     def cual_id(self):
+        """
+        Devuelve el id del nodo.
+        """
         return self.id
 
 class Arista:
+    """
+    La clase arista consiste en un identificador
+    como un par ordenado de nodos_id, incluye información 
+    de la velocidad máxima, la longitud y la capacidad de 
+    dicha arista.
+
+    La arista también mantiene un conteo de cuántos autos están presentes.
+    """
     def __init__(self,par_ordenado:str, max_vel:float, longitud:float, capacidad:int):
         self.nodos = par_ordenado.split(',') 
         self.max_vel = max_vel
@@ -20,37 +40,62 @@ class Arista:
         self.num_autos = 0
         self.t_min = longitud/max_vel
 
-    def _agrega_auto(self):
+    def agrega_auto(self):
+        """añade un auto a la arista"""
         self.num_autos += 1
 
-    def _quita_auto(self):
+    def quita_auto(self):
+        """elimina un auto de la arista"""
         self.num_autos -= 1
 
     def costo(self):
+        """
+        Devuelve el costo actual de la arista (tiempo)
+        dado como la función BPR dependiente de la capacidad y el número
+        de autos presentes en la arista
+        """
         alpha = 0.2
         beta = 10.
         return self.t_min * (1.+alpha*(self.num_autos/self.capacidad)**beta)
 
 class Red:
+    """
+    Una red es un objeto que contiene 
+    dos diccionarios, uno de aristas y uno de nodos.
+    Así mismo, contiene información del orden y grado.
+    """
     def __init__(self):
         self.nodos = dict()
         self.aristas = dict()
         self.n = 0
         self.m = 0
     
-    def _agrega_nodo(self, nodo_id:str):
+    def agrega_nodo(self, nodo_id:str):
+        """
+        Agrega un nodo con id nodo_id a la red.
+        Aumenta en uno el grado.
+        """
         self.n += 1
         nodo = Nodo(nodo_id)
         self.nodos[nodo_id] = nodo
         return 
     
     def nodo_de_id(self, nodo_id:str):
+        """
+        Devuelve el nodo con nodo_id contenido en la red,
+        si este existe, en caso contrario devuelve None.
+        """
         if nodo_id in self.nodos:
             return self.nodos[nodo_id]
         else: 
             return None
     
-    def _agrega_arista(self, par_ordenado:str, max_vel:float, longitud:float, capacidad:int):
+    def agrega_arista(self, par_ordenado:str, max_vel:float, longitud:float, capacidad:int):
+        """
+        Agrega una arista identificada como un par ordenado
+        a la red, aumenta en 1 el orden. La arista incluye información de
+        maxima velocidad, longitud y capacidad.
+        """
         self.m += 1
         u, v = par_ordenado.split(',')
         if u not in self.nodos:
@@ -64,6 +109,10 @@ class Red:
         return
     
     def arista_de_id(self, par_ordenado):
+        """
+        Devuelve el la arista con identificador par_ordenado
+        contenida en la red, si esta existe, en caso contrario devuelve None.
+        """
         if par_ordenado in self.aristas:
             return self.aristas[par_ordenado]
         else: 
