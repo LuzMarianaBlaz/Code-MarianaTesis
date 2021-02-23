@@ -76,7 +76,7 @@ def A_star(red:Red,heuristica,origen:str,destino:str):
 
 
 ## Método construye_camino
-def construye_camino(nodo, nodo_origen):
+def construye_camino(nodo:Tree_node, nodo_origen:Tree_node):
     """
     Devuelve el camino desde el nodo origen hasta el nodo deseado.
     """
