@@ -4,19 +4,19 @@ if __name__ == '__main__':
 
     r = redes.Red()
 
-    r.agrega_vertice('a')
-    r.agrega_vertice('b')
-    r.agrega_vertice('c')
-    r.agrega_vertice('d')
-    r.agrega_vertice('e')
-    r.agrega_vertice('f')
+    r._agrega_nodo('a')
+    r._agrega_nodo('b')
+    r._agrega_nodo('c')
+    r._agrega_nodo('d')
+    r._agrega_nodo('e')
+    r._agrega_nodo('f')
 
-    r.agrega_arista('a,c', 5., 7., 3)
-    r.agrega_arista('c,d', 5., 7., 4)
-    r.agrega_arista('d,b', 5., 7., 2)
-    r.agrega_arista('b,a', 5., 7., 1)
-    r.agrega_arista('d,e', 5., 7., 6)
-    r.agrega_arista('e,d', 5., 7., 2)
+    r._agrega_arista('a,c', 5., 7., 3)
+    r._agrega_arista('c,d', 5., 7., 4)
+    r._agrega_arista('d,b', 5., 7., 2)
+    r._agrega_arista('b,a', 5., 7., 1)
+    r._agrega_arista('d,e', 5., 7., 6)
+    r._agrega_arista('e,d', 5., 7., 2)
 
     for v in r.nodos:
         print(v,r.nodos[v].vecinos)
