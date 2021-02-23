@@ -156,10 +156,10 @@ def genera_red_cuadrada(n_lado:int, max_vel_dist:list, long_dist:list, cap_dist:
             pares.append(str(i)+','+str(vec))
     
     for i in range(n):
-        rc._agrega_nodo(str(i))
+        rc.agrega_nodo(str(i))
     
     for i in range(m):
-        rc._agrega_arista(pares[i],max_vel[i],longitudes[i],cap[i])
+        rc.agrega_arista(pares[i],max_vel[i],longitudes[i],cap[i])
     
     return rc
 
