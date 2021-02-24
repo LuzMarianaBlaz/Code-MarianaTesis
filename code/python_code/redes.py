@@ -2,13 +2,25 @@ import numpy.random as rand
 
 class Nodo:
     """
-    Genera un nodo, a partir de un nodo_id.
-    Se inicializa con una lista de vecinos vacía e incluye los métodos
-    _nuevo_vecino(vecino_id) y cual_id(self).
+    Genera un nodo.
+    ...
+    Atributos
+    ----------
+    nodo_id: El identificador de nodo.
+    lugar: La ubicación dada como una lista de dos elementos,
+    latitud y longitud, si no se especifica, se asigna como ubicación None.
+    vecinos: Se inicializa como una lista vacía, después pueden agregarse 
+    nodo_ids de los vecinos del nodo.
+
+    Métodos
+    -------
+    _nuevo_vecino(vecino_id): Agrega un vecino_id a la lista de vecinos.
+    cual_id(self): Regresa el id del nodo.
     """
-    def __init__(self, nodo_id:str):
+    def __init__(self, nodo_id:str, lugar:list=None):
         self.id = nodo_id
         self.vecinos = []
+        self.lugar = lugar
 
     def nuevo_vecino(self, vecino_id:str):
         """
@@ -69,14 +81,17 @@ class Red:
         self.aristas = dict()
         self.n = 0
         self.m = 0
+        self.ismap = True
     
-    def agrega_nodo(self, nodo_id:str):
+    def agrega_nodo(self, nodo_id:str, lugar:list=None):
         """
         Agrega un nodo con id nodo_id a la red.
         Aumenta en uno el grado.
         """
         self.n += 1
-        nodo = Nodo(nodo_id)
+        if lugar is None:
+            self.ismap = False
+        nodo = Nodo(nodo_id, lugar)
         self.nodos[nodo_id] = nodo
         return 
     
@@ -117,8 +132,9 @@ class Red:
             return self.aristas[par_ordenado]
         else: 
             return None
+        
 
-def genera_red_cuadrada(n_lado:int, max_vel_dist:list, long_dist:list, cap_dist:list):
+def genera_red_cuadrada(n_lado:int, max_vel_dist:list, long_dist:list, cap_dist:list, mapa:bool=False):
     """
     Genera una red cuadrada
     Parámetros:
@@ -127,6 +143,9 @@ def genera_red_cuadrada(n_lado:int, max_vel_dist:list, long_dist:list, cap_dist:
     max_vel_dist: la distribución de velocidades máximas
     long_dist: la distribución de longitudes de arista
     cap_dist: la distribución de capacidades
+    mapa: Un booleano que indica si los nodos deben o no tener 
+    latitud y longitud. El default es False (la gráfica no
+    representa un mapa).
     """
     rc = Red()
     n = int(n_lado ** 2)
@@ -154,9 +173,12 @@ def genera_red_cuadrada(n_lado:int, max_vel_dist:list, long_dist:list, cap_dist:
 
         for vec in vecinos_i:
             pares.append(str(i)+','+str(vec))
-    
+            
+    if mapa:
+        posiciones = []
+
     for i in range(n):
-        rc.agrega_nodo(str(i))
+        rc.agrega_nodo(str(i),posiciones[i])
     
     for i in range(m):
         rc.agrega_arista(pares[i],max_vel[i],longitudes[i],cap[i])
