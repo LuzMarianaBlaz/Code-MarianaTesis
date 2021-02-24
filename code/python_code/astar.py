@@ -119,6 +119,9 @@ def mejora(edo_vecino:Tree_node, abierto:list, cerrado:list):
     return
 
 # TODO: Definir algunas heurísticas
+# Hacer la heurística tiempo euclideano, que utilice el atributo Nodo.lugar
+# calcule distancia euclideana (asumir plano) y divida entre la vel promedio
+# de la ciudad.
 
 # TODO: Pruebas del algoritmo base
 
