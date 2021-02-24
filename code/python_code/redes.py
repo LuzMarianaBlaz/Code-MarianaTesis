@@ -173,8 +173,11 @@ def genera_red_cuadrada(n_lado:int, max_vel_dist:list, long_dist:list, cap_dist:
 
         for vec in vecinos_i:
             pares.append(str(i)+','+str(vec))
-            
+
     if mapa:
+        #TODO: Hacer el caso cuando mapa=True, las posiciones deben 
+        # poder calcularse de las relaciones de vecinos y las longitudes.
+        # Idea: hacerlo por fila
         posiciones = []
 
     for i in range(n):
