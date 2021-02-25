@@ -1,4 +1,5 @@
 import numpy.random as rand
+import numpy as np
 
 class Nodo:
     """
@@ -134,14 +135,14 @@ class Red:
             return None
         
 
-def genera_red_cuadrada(n_lado:int, max_vel_dist:list, long_dist:list, cap_dist:list, mapa:bool=False):
+def genera_red_cuadrada(n_lado:int, max_vel_dist:list, longitud:float, cap_dist:list, mapa:bool=False):
     """
     Genera una red cuadrada
     Parámetros:
     n_lado: el número de vértices por lado de la red,
     lista de dos entradas, la media y la desviación estándar de:
     max_vel_dist: la distribución de velocidades máximas
-    long_dist: la distribución de longitudes de arista
+    longitud: la longitud de las calles
     cap_dist: la distribución de capacidades
     mapa: Un booleano que indica si los nodos deben o no tener 
     latitud y longitud. El default es False (la gráfica no
@@ -151,7 +152,6 @@ def genera_red_cuadrada(n_lado:int, max_vel_dist:list, long_dist:list, cap_dist:
     n = int(n_lado ** 2)
     m = int(2*n_lado**2-2*n_lado)*2
     max_vel = rand.normal(max_vel_dist[0],max_vel_dist[1], m)
-    longitudes = rand.normal(long_dist[0],long_dist[1], m)
     cap = rand.normal(cap_dist[0],cap_dist[1], m)
 
     pares = []
@@ -175,16 +175,20 @@ def genera_red_cuadrada(n_lado:int, max_vel_dist:list, long_dist:list, cap_dist:
             pares.append(str(i)+','+str(vec))
 
     if mapa:
+        posiciones = []
         #TODO: Hacer el caso cuando mapa=True, las posiciones deben 
         # poder calcularse de las relaciones de vecinos y las longitudes.
         # Idea: hacerlo por fila
-        posiciones = []
+        for i in range(n_lado): 
+            for j in range(n_lado): 
+                posiciones.append([j*longitud,longitud*(n_lado-1)-i])
+
 
     for i in range(n):
         rc.agrega_nodo(str(i),posiciones[i])
     
     for i in range(m):
-        rc.agrega_arista(pares[i],max_vel[i],longitudes[i],cap[i])
+        rc.agrega_arista(pares[i],max_vel[i],longitud,cap[i])
     
     return rc
 
