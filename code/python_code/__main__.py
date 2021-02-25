@@ -24,9 +24,10 @@ if __name__ == '__main__':
     for par in r.aristas:
         print(par, r.aristas[par].capacidad)
 
-    rc = redes.genera_red_cuadrada(2,[12.,0.,],[1.,0.],[13,4])
+    rc = redes.genera_red_cuadrada(3,[12.,0.,],1.,[13,4],mapa=True)
     for v in rc.nodos:
-        print(v,rc.nodos[v].vecinos)
+        print(v,rc.nodos[v].vecinos,rc.nodos[v].lugar)
 
     for par in rc.aristas:
         print(par, rc.aristas[par].max_vel, rc.aristas[par].longitud, rc.aristas[par].capacidad)
+    print(rc.ismap)
