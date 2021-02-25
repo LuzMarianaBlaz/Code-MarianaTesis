@@ -1,5 +1,6 @@
 from .redes import Red
 import heapq
+import numpy as np
 
 #Objetos a utilizarse en el árbol de búsqueda
 class Tree_node:
@@ -67,7 +68,7 @@ def A_star(red:Red,heuristica,origen:str,destino:str):
         for vecino in vecinos:
             edo_vec = Tree_node(vecino.node_id, edo_actual)
             edo_vec.pre_costo = edo_actual.pre_costo + red.arista_de_id(str(edo_actual.node_id)+','+str(edo_vec.node_id)).costo
-            edo_vec.costo_futuro = heuristica(edo_vec, edo_final)
+            edo_vec.costo_futuro = heuristica(red,edo_vec, edo_final)
             edo_vec.costo_total = edo_vec.pre_costo + edo_vec.costo_futuro
             mejora(edo_vec, abierto, cerrado)
 
@@ -119,6 +120,18 @@ def mejora(edo_vecino:Tree_node, abierto:list, cerrado:list):
     return
 
 # TODO: Definir algunas heurísticas
+def tiempo_euclideano(red:Red,edo:Tree_node,edo_final:Tree_node):
+    """
+    Devuelve el tiempo que tomaría recorrer del edo al edo_final
+    si se viajara en línea recta a la velocidad máxima reportada 
+    para el mapa.
+    """
+    distancia = np.sqrt(
+        (red.nodo_de_id(edo.node_id).lugar[0]-red.nodo_de_id(edo_final.node_id).lugar[0])**2+
+        (red.nodo_de_id(edo.node_id).lugar[1]-red.nodo_de_id(edo_final.node_id).lugar[1])**2)
+    velocidad = 20.
+    tiempo = distancia/velocidad
+    return tiempo
 # Hacer la heurística tiempo euclideano, que utilice el atributo Nodo.lugar
 # calcule distancia euclideana (asumir plano) y divida entre la vel promedio
 # de la ciudad.
