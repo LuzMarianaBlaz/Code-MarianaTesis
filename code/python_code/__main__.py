@@ -31,3 +31,5 @@ if __name__ == '__main__':
     for par in rc.aristas:
         print(par, rc.aristas[par].max_vel, rc.aristas[par].longitud, rc.aristas[par].capacidad)
     print(rc.ismap)
+
+    #TODO: Pruebas del algoritmo base
