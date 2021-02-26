@@ -1,4 +1,4 @@
-from .redes import Red
+import redes
 import heapq
 import numpy as np
 
@@ -14,7 +14,7 @@ class Tree_node:
     la suma de ambos costos.
     """
 
-    def __init__(self, node_id: str, parent:Tree_node):
+    def __init__(self, node_id: str, parent):
         self.node_id = node_id
         self.parent = parent
         self.pre_costo = 0.
@@ -35,7 +35,7 @@ class Tree_node:
 
 
 #Algoritmo A* clásico
-def A_star(red:Red,heuristica,origen:str,destino:str):
+def A_star(red:redes.Red,heuristica,origen:str,destino:str):
     #Paso 1: Genera los conjuntos abierto y cerrado
     abierto = []
     cerrado = []
@@ -66,8 +66,8 @@ def A_star(red:Red,heuristica,origen:str,destino:str):
 
         #Para cada vecino:
         for vecino in vecinos:
-            edo_vec = Tree_node(vecino.node_id, edo_actual)
-            edo_vec.pre_costo = edo_actual.pre_costo + red.arista_de_id(str(edo_actual.node_id)+','+str(edo_vec.node_id)).costo
+            edo_vec = Tree_node(vecino, edo_actual)
+            edo_vec.pre_costo = edo_actual.pre_costo + red.arista_de_id(str(edo_actual.node_id)+','+str(edo_vec.node_id)).costo()
             edo_vec.costo_futuro = heuristica(red,edo_vec, edo_final)
             edo_vec.costo_total = edo_vec.pre_costo + edo_vec.costo_futuro
             mejora(edo_vec, abierto, cerrado)
@@ -120,7 +120,7 @@ def mejora(edo_vecino:Tree_node, abierto:list, cerrado:list):
     return
 
 # TODO: Definir algunas heurísticas
-def tiempo_euclideano(red:Red,edo:Tree_node,edo_final:Tree_node):
+def tiempo_euclideano(red:redes.Red,edo:Tree_node,edo_final:Tree_node):
     """
     Devuelve el tiempo que tomaría recorrer del edo al edo_final
     si se viajara en línea recta a la velocidad máxima reportada 
