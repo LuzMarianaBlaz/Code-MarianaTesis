@@ -1,4 +1,5 @@
 import redes
+from astar import *
 
 if __name__ == '__main__':
 
@@ -24,7 +25,7 @@ if __name__ == '__main__':
     for par in r.aristas:
         print(par, r.aristas[par].capacidad)
 
-    rc = redes.genera_red_cuadrada(3,[12.,0.,],1.,[13,4],mapa=True)
+    rc = redes.genera_red_cuadrada(3,[1.,0.,],1.,[2,0],mapa=True)
     for v in rc.nodos:
         print(v,rc.nodos[v].vecinos,rc.nodos[v].lugar)
 
@@ -33,3 +34,5 @@ if __name__ == '__main__':
     print(rc.ismap)
 
     #TODO: Pruebas del algoritmo base
+    result = A_star(rc,tiempo_euclideano,'0','6')
+    print(result)
