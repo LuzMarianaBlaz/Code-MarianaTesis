@@ -25,7 +25,7 @@ if __name__ == '__main__':
     for par in r.aristas:
         print(par, r.aristas[par].capacidad)
     print('prueba en la red pequenia')
-    result = A_star(r,tiempo_euclideano,'e','a')
+    result = A_star(r,tiempo_euclideano,'e','f')
     print(result)
 
 
