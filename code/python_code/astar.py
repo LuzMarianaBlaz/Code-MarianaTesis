@@ -120,6 +120,7 @@ def mejora(edo_vecino:Tree_node, abierto:list, cerrado:list):
             print('heapushing')
             return
     
+    #si el costo no mejora esta metiendo elementos al abierto!!!
     heapq.heappush(abierto,edo_vecino)
     return
 
