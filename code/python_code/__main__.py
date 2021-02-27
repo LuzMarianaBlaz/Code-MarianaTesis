@@ -5,19 +5,19 @@ if __name__ == '__main__':
 
     r = redes.Red()
 
-    r.agrega_nodo('a',[0,2])
-    r.agrega_nodo('b',[1,0])
-    r.agrega_nodo('c',[0,1])
-    r.agrega_nodo('d',[1,1])
-    r.agrega_nodo('e',[0,0])
-    r.agrega_nodo('f',[7,2])
+    r.agrega_nodo('a',[0.,2.])
+    r.agrega_nodo('b',[1.,0.])
+    r.agrega_nodo('c',[0.,1.])
+    r.agrega_nodo('d',[1.,1.])
+    r.agrega_nodo('e',[0.,0.])
+    r.agrega_nodo('f',[7.,2.])
 
-    r.agrega_arista('a,c', 5., 1., 3)
-    r.agrega_arista('c,d', 5., 1., 4)
-    r.agrega_arista('d,b', 5., 1., 2)
+    r.agrega_arista('a,c', 5., 1., 1)
+    r.agrega_arista('c,d', 5., 1., 1)
+    r.agrega_arista('d,b', 5., 1., 1)
     r.agrega_arista('b,a', 5., 2.236, 1)
-    r.agrega_arista('d,e', 5., 1.4142, 6)
-    r.agrega_arista('e,d', 5., 1.4142, 2)
+    r.agrega_arista('d,e', 5., 1.4142, 1)
+    r.agrega_arista('e,d', 5., 1.4142, 1)
 
     for v in r.nodos:
         print(v,r.nodos[v].vecinos)
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     for par in r.aristas:
         print(par, r.aristas[par].capacidad)
     print('prueba en la red pequenia')
-    result = A_star(r,tiempo_euclideano,'a','f')
+    result = A_star(r,tiempo_euclideano,'e','f')
     print(result)
 
 
