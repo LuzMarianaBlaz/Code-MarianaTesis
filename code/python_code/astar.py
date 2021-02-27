@@ -68,8 +68,6 @@ def A_star(red:redes.Red,heuristica,origen:str,destino:str):
         for vecino in vecinos:
             edo_vec = Tree_node(vecino, edo_actual)
             edo_vec.pre_costo = edo_actual.pre_costo + red.arista_de_id(str(edo_actual.node_id)+','+str(edo_vec.node_id)).costo()
-            print(len(abierto))
-            #print('pre_costo',edo_vec.pre_costo)
             edo_vec.costo_futuro = heuristica(red,edo_vec, edo_final)
             edo_vec.costo_total = edo_vec.pre_costo + edo_vec.costo_futuro
             mejora(edo_vec, abierto, cerrado)
@@ -102,26 +100,30 @@ def mejora(edo_vecino:Tree_node, abierto:list, cerrado:list):
     El estado vecino se agrega al conjunto abierto con su costo y su padre
     si no se cumple ninguna de las condiciones establecidas arriba.
     """
+    append_abierto = True
     for edo in abierto:
-        if (edo_vecino == edo) and (edo_vecino.pre_costo < edo.pre_costo):
+        if edo_vecino.node_id == edo.node_id:
+            append_abierto = False
+        if (edo_vecino.node_id == edo.node_id) and (edo_vecino.pre_costo < edo.pre_costo):
             edo.pre_costo = edo_vecino.pre_costo
             edo.costo_total = edo.pre_costo + edo.costo_futuro
             edo.parent = edo_vecino.parent
             heapq.heapify(abierto)
-            #print('mejora en el abierto',edo_vecino.pre_costo, edo.pre_costo)
             return
     for edo in cerrado:
-        if (edo_vecino == edo) and (edo_vecino.pre_costo < edo.pre_costo):
-            edo.pre_costo = edo_vecino.pre_costo
-            edo.costo_total = edo.pre_costo + edo.costo_futuro
-            edo.parent = edo_vecino.parent
-            cerrado.remove(edo)
-            heapq.heappush(abierto,edo)
-            print('heapushing')
-            return
+        if (edo_vecino.node_id == edo.node_id):
+            if (edo_vecino.pre_costo < edo.pre_costo):
+                edo.pre_costo = edo_vecino.pre_costo
+                edo.costo_total = edo.pre_costo + edo.costo_futuro
+                edo.parent = edo_vecino.parent
+                cerrado.remove(edo)
+                heapq.heappush(abierto,edo)
+                return
+            else:
+                append_abierto = False
     
-    #si el costo no mejora esta metiendo elementos al abierto!!!
-    heapq.heappush(abierto,edo_vecino)
+    if append_abierto:
+        heapq.heappush(abierto,edo_vecino)
     return
 
 # TODO: Definir algunas heurísticas
