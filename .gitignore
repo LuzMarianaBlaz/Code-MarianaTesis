@@ -1,4 +1,4 @@
 .ipynb_checkpoints/
 code/python_code/__pycache__
 .DS_Store
-julia-code/*.ipynb
+code/julia-code/*.ipynb
