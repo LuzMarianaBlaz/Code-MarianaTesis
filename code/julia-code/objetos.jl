@@ -82,4 +82,4 @@ end
     - Varios autos con ciertas caracterísitcas
     - Redes cuadradas de nXn
     - Redes cuadradas de nxn con k diagonales
-    - Redes aleatorias =#]
+    - Redes aleatorias =#
