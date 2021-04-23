@@ -28,10 +28,10 @@ function speed(u::Int,v::Int,
 return (speed(u, position_array, speed_memory)+speed(v,position_array,speed_memory))/2
 end
 
-function update_Astarpath(Auto::auto)
-    Auto.astarpath = LightGraphs.a_star(Auto.red.digraph,
-        Auto.o, Auto.d,Auto.red.time_matrix,
-        n -> MemoryHeuristic(n, Auto.d,Auto.red.position_array,
+function update_Astarpath(Auto::auto, Red::network)
+    Auto.astarpath = LightGraphs.a_star(Red.digraph,
+        Auto.o, Auto.d,Red.time_matrix,
+        n -> MemoryHeuristic(n, Auto.d, Red.position_array,
             Auto.h,Auto.speed_memory))
 end
 
