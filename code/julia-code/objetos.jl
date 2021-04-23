@@ -18,9 +18,6 @@ mutable struct auto
     #constante h 
     h::Float64
 
-    #Red
-    red::network
-
     #memoria de las velocidades en los nodos
     speed_memory::Dict{Int64,Float64}
 
@@ -38,6 +35,6 @@ mutable struct auto
                 d,Red.position_array))
         last_node = o
         avance = 0.
-        new(o,d,ts,h,Red,speed_memory,Astarpath,last_node,avance)
+        new(o,d,ts,h,speed_memory,Astarpath,last_node,avance)
     end
 end
