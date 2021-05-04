@@ -30,7 +30,7 @@ end
 
 function update_Astarpath(Auto::auto, Red::network)
     Auto.astarpath = LightGraphs.a_star(Red.digraph,
-        Auto.o, Auto.d,Red.time_matrix,
+        Auto.o, Auto.d,Red.city_matrix[:,:,3],
         n -> MemoryHeuristic(n, Auto.d, Red.position_array,
             Auto.h,Auto.speed_memory))
 end
