@@ -36,7 +36,7 @@ function SquareDiGraph(n::Integer)
             add_edge!(red, i, neighboor)
         end
     end
-    position_array = [[(i-1)%n, div(i-.01,n)] for i in 1:n^2];
+    position_array = [[(i-1)%n, div(i-.01,n)] for i in 1:n^2]*100. #las calles miden 100m;
     return red, position_array, distance_matrix(position_array)
 end
 

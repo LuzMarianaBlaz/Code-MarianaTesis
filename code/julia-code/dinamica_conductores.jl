@@ -5,9 +5,9 @@ function max_speed(u::Int,
     position_array::Array{Array{Float64,1},1}=[[0.,0.]])
     x_array = [first(element) for element in position_array]
 if position_array[u][1] < maximum(x_array)/2.
-    return 50
+    return 15 #m/s
 else
-    return 30
+    return 8 #m/s
 end
 end
 
@@ -35,7 +35,7 @@ function update_Astarpath(Auto::auto, Red::network)
             Auto.h,Auto.speed_memory))
 end
 
-function BPR(tmin_ij::Float, f_ij::Float ,p_ij::Float, α::Float = 0.2, β::Float = 10.) 
+function BPR(tmin_ij::Float64, f_ij::Float64 ,p_ij::Float64, α::Float64 = 0.2, β::Float64 = 10.) 
     t = tmin_ij *(1+α*(f_ij / p_ij)^β)
     return t
 end
