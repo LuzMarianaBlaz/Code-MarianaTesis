@@ -30,12 +30,12 @@ end
 
 function update_Astarpath(Auto::auto, Red::network)
     Auto.astarpath = LightGraphs.a_star(Red.digraph,
-        Auto.o, Auto.d,Red.city_matrix[:,:,3],
+        Auto.o, Auto.d,Red.city_matrix[:,:,1],
         n -> MemoryHeuristic(n, Auto.d, Red.position_array,
             Auto.h,Auto.speed_memory))
 end
 
-function BPR(tmin_ij::Float32, f_ij::Int16 ,p_ij::Float32, α::Float64 = 0.2, β::Float64 = 10.) # Funciona bien!! 
+function BPR(tmin_ij::Float, f_ij::Float ,p_ij::Float, α::Float = 0.2, β::Float = 10.) 
     t = tmin_ij *(1+α*(f_ij / p_ij)^β)
     return t
 end
