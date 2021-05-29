@@ -27,9 +27,11 @@ mutable struct auto
     ##Información del nodo del que acaban de salir y el avance respecto a este
     last_node::Int64
     avance::Float64
+    vel::Float64
 
     #si el auto ya salió o no
     is_out::Bool
+    llego::Bool
     
     function auto(o::Int64, d::Int64, ts::Float64, h::Float64,Red::network)
         speed_memory = Dict{Int64, Float64}()
@@ -38,7 +40,9 @@ mutable struct auto
                 d,Red.position_array))
         last_node = o
         avance = 0.
+        vel = 0.
         is_out = false
-        new(o,d,ts,h,speed_memory,Astarpath,last_node,avance,is_out)
+        llego = false
+        new(o,d,ts,h,speed_memory,Astarpath,last_node,avance,vel,is_out,llego)
     end
 end
