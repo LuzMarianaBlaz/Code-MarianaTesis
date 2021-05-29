@@ -101,3 +101,57 @@ function sig_ca(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
     end
     return sca, car
 end 
+
+function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})                
+    while (length([auto for auto in Autos if auto.llego]) < length(Autos))
+                            sts, car_sale = sig_ts(tiempo_universal, Red, Autos)
+                            sca, car_cambia = sig_ca(tiempo_universal, Red, Autos)
+                            siguiente_tiempo = min(sts, sca)
+                            tiempo_universal += siguiente_tiempo
+                            print(stderr, tiempo_universal,"\n")
+                            if sts < sca
+                                print(stderr, "sale un auto de ", car_sale.o, "\n")
+                                car_sale.is_out = true
+                                u = car_sale.o
+                                v = dst(car_sale.astarpath[1])
+                                Red.city_matrix[u,v,3] += 1
+                            else
+                                u = car_cambia.last_node
+                                car_cambia.speed_memory[u] = car_cambia.vel
+
+                                index1 = findall(x->src(x)==u, car_cambia.astarpath)    
+                                v = dst(car_cambia.astarpath[index1][1])
+                                print(stderr,"cambio en la esquina ",v,"\n")
+                                Red.city_matrix[u,v,3] -= 1
+                        
+                                car_cambia.last_node = v
+                                if v == car_cambia.d
+                                    print(stderr, "llegué","\n")
+                                    car_cambia.llego = true
+                                else
+                                    u = v
+                                    index2 = findall(x->src(x)==u, car_cambia.astarpath)    
+                                    v = dst(car_cambia.astarpath[index2][1])
+                                    Red.city_matrix[u,v,3] += 1      
+                                end
+                            end
+        
+                            for auto in [auto for auto in Autos if (auto.is_out && !(auto.llego))]
+                                auto.avance = auto.vel * siguiente_tiempo
+                            end
+                    
+                            Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1], Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);
+                        end
+                    end
+        
+     
+                    
+                    
+function restart(Autos, Red)
+    for auto in Autos
+        auto.is_out = false
+        auto.llego = false
+        auto.last_node = auto.o
+        auto.astarpath = update_Astarpath(auto, Red)
+    end
+end
