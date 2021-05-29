@@ -75,3 +75,29 @@ function sig_ts(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
     end
     return sts, car
 end
+
+function sig_ca(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
+    Autos = [auto for auto in Autos if (auto.is_out && !(auto.llego))]
+    sca = Inf
+    car = nothing
+                
+    for auto in Autos  
+        ## debe comprobar primero si puede hacer el cambio
+        u = auto.last_node
+        index = findall(x->src(x)==u, auto.astarpath)    
+        v = dst(auto.astarpath[index][1])
+        
+        if Red.city_matrix[u,v,3] < Red.city_matrix[u,v,2]
+
+            tiempo = Red.city_matrix[u,v,4]
+            longitud = norm(Red.position_array[u]-Red.position_array[v])
+            auto.vel = longitud/tiempo
+        
+            if tiempo * (longitud - auto.avance)/longitud < sca
+                sca = tiempo * (longitud - auto.avance)/longitud
+                car = auto
+            end
+        end
+    end
+    return sca, car
+end 
