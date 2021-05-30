@@ -5,15 +5,15 @@ function max_speed(u::Int,
     position_array::Array{Array{Float64,1},1}=[[0.,0.]])
     x_array = [first(element) for element in position_array]
 if position_array[u][1] < maximum(x_array)/2.
-    return 15 #m/s
+    return 15. #m/s
 else
-    return 8 #m/s
+    return 8. #m/s
 end
 end
 
 function max_speed(u::Int,v::Int, 
     position_array::Array{Array{Float64,1},1})
-return (max_speed(u, position_array)+max_speed(v,position_array))/2
+return (max_speed(u, position_array)+max_speed(v,position_array))/2.
 end
 
 function speed(u::Int, 
@@ -36,7 +36,7 @@ function update_Astarpath(Auto::auto, Red::network)
 end
 
 function BPR(tmin_ij::Float64, f_ij::Float64 ,p_ij::Float64, α::Float64 = 0.2, β::Float64 = 10.) 
-    t = tmin_ij *(1+α*(f_ij / p_ij)^β)
+    t = tmin_ij *(1.0+α*(f_ij / p_ij)^β)
     return t
 end
 
@@ -114,7 +114,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                 car_sale.is_out = true
                                 u = car_sale.o
                                 v = dst(car_sale.astarpath[1])
-                                Red.city_matrix[u,v,3] += 1
+                                Red.city_matrix[u,v,3] += 1.
                             else
                                 u = car_cambia.last_node
                                 car_cambia.speed_memory[u] = car_cambia.vel
@@ -122,7 +122,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                 index1 = findall(x->src(x)==u, car_cambia.astarpath)    
                                 v = dst(car_cambia.astarpath[index1][1])
                                 print(stderr,"cambio en la esquina ",v,"\n")
-                                Red.city_matrix[u,v,3] -= 1
+                                Red.city_matrix[u,v,3] -= 1.
                         
                                 car_cambia.last_node = v
                                 if v == car_cambia.d
@@ -132,7 +132,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                     u = v
                                     index2 = findall(x->src(x)==u, car_cambia.astarpath)    
                                     v = dst(car_cambia.astarpath[index2][1])
-                                    Red.city_matrix[u,v,3] += 1      
+                                    Red.city_matrix[u,v,3] += 1.      
                                 end
                             end
         
