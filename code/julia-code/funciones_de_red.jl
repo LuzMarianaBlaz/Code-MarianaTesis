@@ -41,6 +41,33 @@ function SquareDiGraph(n::Integer)
 end
 
 
+function SquareDiGraph_stopinCorners(n::Integer)
+    k = (3*n-2)^2
+    red = SimpleDiGraph(k)
+    
+    for i in 1:k
+        i_neighboors = []
+        if i > n
+            push!(i_neighboors, i-n)
+        end
+        if i ≤ n*(n-1)
+            push!(i_neighboors, i+n)
+        end
+        if i%n != 1
+            push!(i_neighboors, i-1)
+        end
+        if i%n != 0
+            push!(i_neighboors, i+1)
+        end
+        for neighboor in i_neighboors
+            add_edge!(red, i, neighboor)
+        end
+    end
+    position_array = [[(i-1)%n, div(i-.01,n)] for i in 1:n^2]*100. #las calles miden 100m;
+    return red, position_array, distance_matrix(position_array)
+end
+
+
 function EuclideanHeuristic(i::Integer, j::Integer,
     position_array::Array{Array{Float64,1},1})::Float64
     return norm(position_array[i]-position_array[j])
