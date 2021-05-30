@@ -153,6 +153,8 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                     
 function restart(Autos, Red)
     for auto in Autos
+        auto.avance = 0.
+        auto.vel = 0.
         auto.is_out = false
         auto.llego = false
         auto.last_node = auto.o
