@@ -28,6 +28,7 @@ mutable struct auto
     last_node::Int64
     avance::Float64
     vel::Float64
+    posicion::Array{Array{Float64,1},1}
 
     #si el auto ya salió o no
     is_out::Bool
@@ -41,8 +42,9 @@ mutable struct auto
         last_node = o
         avance = 0.
         vel = 0.
+        posicion=[Red.position_array[o]]
         is_out = false
         llego = false
-        new(o,d,ts,h,speed_memory,Astarpath,last_node,avance,vel,is_out,llego)
+        new(o,d,ts,h,speed_memory,Astarpath,last_node,avance,vel,posicion,is_out,llego)
     end
 end
