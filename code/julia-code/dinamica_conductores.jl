@@ -138,7 +138,8 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                             end
         
                             for auto in [auto for auto in Autos if (auto.is_out && !(auto.llego))]
-                                auto.avance = auto.vel * siguiente_tiempo
+                                auto.avance += auto.vel * siguiente_tiempo
+
                                 if sca<sts && auto==car_cambia
                                     auto.avance = 0.
                                 end
