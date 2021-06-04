@@ -138,13 +138,14 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
         
                             for auto in [auto for auto in Autos if (auto.is_out && !(auto.llego))]
                                 auto.avance = auto.vel * siguiente_tiempo
-                                u = auto.last_node
-                                index = findall(x->src(x)==u, auto.astarpath)
-                                v = dst(auto.astarpath[index][1])
-                                push!(auto.posicion,Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u]))
                                 if sca<sts && auto==car_cambia
                                     auto.avance = 0.
                                 end
+                                u = auto.last_node
+                                index = findall(x->src(x)==u, auto.astarpath)
+                                v = dst(auto.astarpath[index][1])
+                                push!(auto.posicion,
+                                Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u])/norm(Red.position_array[v]-Red.position_array[u]))
                             end
 
                     
