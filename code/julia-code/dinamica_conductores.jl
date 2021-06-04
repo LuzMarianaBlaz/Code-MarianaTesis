@@ -102,12 +102,14 @@ function sig_ca(Red::network, Autos::Array{auto,1})
     return sca, car
 end 
 
-function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})                
+function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
+    time_array = []                
     while (length([auto for auto in Autos if auto.llego]) < length(Autos))
                             sts, car_sale = sig_ts(tiempo_universal, Red, Autos)
                             sca, car_cambia = sig_ca(Red, Autos)
                             siguiente_tiempo = min(sts, sca)
                             tiempo_universal += siguiente_tiempo
+                            push!(time_array, tiempo_universal)
                             print(stderr, tiempo_universal,"\n")
                             if sts < sca
                                 print(stderr, "sale un auto de ", car_sale.o, "\n")
@@ -153,6 +155,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                     
                             Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1], Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);
                         end
+                        return time_array
                     end
         
      
