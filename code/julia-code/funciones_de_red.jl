@@ -45,9 +45,9 @@ function divide_edge!(edge, digraph, position_array)
     u = src(edge)
     v = dst(edge)
    
-    km1_pos = position_array[u] + (position_array[v] - position_array[u]).*0.05
-    k_pos = position_array[u] + (position_array[v] - position_array[u]).*0.95
-
+    km1_pos = position_array[u] + (position_array[v] - position_array[u]).*0.1
+    k_pos = position_array[u] + (position_array[v] - position_array[u]).*0.9
+    
     push!(position_array,km1_pos,k_pos)    
     add_vertices!(digraph, 2)
     k = nv(digraph)
@@ -55,6 +55,7 @@ function divide_edge!(edge, digraph, position_array)
     add_edge!(digraph, u, k-1)
     add_edge!(digraph, k-1, k)
     add_edge!(digraph, k, v)
+    
     rem_edge!(digraph, edge)
 end
 
