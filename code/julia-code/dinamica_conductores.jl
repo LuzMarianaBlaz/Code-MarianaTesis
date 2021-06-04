@@ -128,6 +128,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                 if v == car_cambia.d
                                     print(stderr, "llegué","\n")
                                     car_cambia.llego = true
+                                    push!(car_cambia.posicion,Red.position_array[car_cambia.d])
                                 else
                                     u = v
                                     index2 = findall(x->src(x)==u, car_cambia.astarpath)    
@@ -164,6 +165,6 @@ function restart(Autos, Red)
         auto.llego = false
         auto.last_node = auto.o
         auto.astarpath = update_Astarpath(auto, Red)
-        auto.posicion = [Red.position_array[o]]
+        auto.posicion = [Red.position_array[auto.o]]
     end
 end
