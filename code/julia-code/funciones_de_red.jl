@@ -40,27 +40,95 @@ function SquareDiGraph(n::Integer)
     return red, position_array, distance_matrix(position_array)
 end
 
+### To add diagonals ###
+function horizontal_range(diag_start, ordenada, pendiente, sidenum, step = 100.)
+    rang = []
+    u = diag_start[2]
+
+    while u >= 0. && ((u-ordenada)/pendiente) < (sidenum-1.)*100.
+        push!(rang,round.([(u-ordenada)/pendiente, u], digits=5))
+        u -= step
+    end
+    return(rang)
+end
+
+function vertical_range(diag_start, ordenada, pendiente, sidenum, step = 100.)
+    rang = []
+    u = round(diag_start[1]/100, digits=0)+100.
+
+    while u <= (sidenum-1)*100
+        push!(rang,[u,round(pendiente*u+ordenada,digits=5)])
+        u += step
+    end
+    return(rang)
+end
+
+function paste_diagonal(nw, position_array, new_positions)
+    original_number = nv(nw)
+    
+    for element in new_positions
+        coord = findall(x -> x %100. == 0., element)[1]
+        val = element[coord]
+        vertices = findall(x -> (x[coord] == val && norm(x[coord%2+1]-element[coord%2+1])<100.), position_array)
+        
+        add_vertex!(nw)
+        vertex_num = nv(nw)
+        add_edge!(nw,vertices[1],vertex_num)
+        add_edge!(nw,vertex_num,vertices[2])
+        add_edge!(nw,vertices[2],vertex_num)
+        add_edge!(nw,vertex_num,vertices[1])
+        rem_edge!(nw, vertices[1], vertices[2])
+        rem_edge!(nw, vertices[2], vertices[1])
+        
+        if vertex_num > original_number+1
+            add_edge!(nw,vertex_num-1,vertex_num)
+        end
+        
+        push!(position_array, element)
+    end
+    return nw, position_array, distance_matrix(position_array)
+end
+
+function add_diagonal!(nw, position_array,diag_start, pendiente, sidenum, step = 100.)
+    ordenada = -diag_start[1]*pendiente + diag_start[2]
+    hr = horizontal_range(diag_start, ordenada, pendiente, sidenum, step)
+    vr = vertical_range(diag_start, ordenada, pendiente, sidenum, step)
+    new_positions = sort(vcat(hr,vr), by = x -> x[1])
+    nw, position_array, distm = paste_diagonal(nw, position_array, new_positions)
+    return nw, position_array, distm, new_positions
+end
+
+### To make slow corners ###
 
 function divide_edge!(edge, digraph, position_array)
     u = src(edge)
     v = dst(edge)
    
-    km1_pos = position_array[u] + (position_array[v] - position_array[u]).*0.1
-    k_pos = position_array[u] + (position_array[v] - position_array[u]).*0.9
+    km1_pos = round.(position_array[u] + (position_array[v] - position_array[u]).*0.1, digits = 3)
+    k_pos = round.(position_array[u] + (position_array[v] - position_array[u]).*0.9, digits = 3)
     
-    push!(position_array,km1_pos,k_pos)    
-    add_vertices!(digraph, 2)
-    k = nv(digraph)
-    
-    add_edge!(digraph, u, k-1)
-    add_edge!(digraph, k-1, k)
-    add_edge!(digraph, k, v)
+    if !(km1_pos in position_array)
+        push!(position_array,km1_pos,k_pos)    
+        add_vertices!(digraph, 2)
+        k = nv(digraph)
+        add_edge!(digraph, u, k-1)
+        add_edge!(digraph, k-1, k)
+        add_edge!(digraph, k, v)
+    else
+        k = findall(x->x==km1_pos, position_array)[1]
+        add_edge!(digraph, u, k)
+        add_edge!(digraph, k, k-1)
+        add_edge!(digraph, k-1, v)
+    end
+
     
     rem_edge!(digraph, edge)
 end
 
-function make_slow_corners(red,position_array,dist_matrix)
-    for element in collect(edges(red))
+function make_slow_corners(red,position_array,new_positions=[])
+    k = length(position_array) - length(new_positions) +1 
+    position_array = [round.(piece,digits=3) for piece in position_array]
+    for element in filter(x -> (src(x) < k || dst(x) < k),collect(edges(red)))
         divide_edge!(element, red, position_array)
     end
     return red, position_array, distance_matrix(position_array)
@@ -71,6 +139,8 @@ function EuclideanHeuristic(i::Integer, j::Integer,
     return norm(position_array[i]-position_array[j])
 end
 
+
+#### Heuristics to include in A* ###
 function TimeEuclideanHeuristic(i::Integer, j::Integer,
     position_array::Array{Array{Float64,1},1})::Float64
     vel = speed(i,j,position_array)
@@ -80,10 +150,8 @@ end
 function MemoryHeuristic(i::Int64, j::Int64,
     position_array::Array{Array{Float64,1},1},h::Float64,
     speed_memory::Dict{Int,Float64}=Dict{Int,Float64})::Float64
-    
-distance = norm(position_array[i]-position_array[j])
-estimation_part = distance/max_speed(i,j,position_array)
-memory_part = distance/speed(i,j,position_array,speed_memory)
-
-return (1-h)*estimation_part + h*memory_part
+    distance = norm(position_array[i]-position_array[j])
+    estimation_part = distance/max_speed(i,j,position_array)
+    memory_part = distance/speed(i,j,position_array,speed_memory)
+    return (1-h)*estimation_part + h*memory_part
 end
