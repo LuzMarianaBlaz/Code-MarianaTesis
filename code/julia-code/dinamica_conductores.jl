@@ -102,14 +102,18 @@ function sig_ca(Red::network, Autos::Array{auto,1})
     return sca, car
 end 
 
-function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
-    time_array = []    
+function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,1},animacion=false)
+    if animacion
+        time_array = []
+    end
     while (length([auto for auto in Autos if auto.llego]) < length(Autos))
                             sts, car_sale = sig_ts(tiempo_universal, Red, Autos)
                             sca, car_cambia = sig_ca(Red, Autos)
                             siguiente_tiempo = min(sts, sca)
                             tiempo_universal += siguiente_tiempo
-                            push!(time_array, tiempo_universal)
+                            if animacion
+                                push!(time_array, tiempo_universal)
+                            end
                             print(stderr, tiempo_universal,"\n")
                             if sts < sca
                                 print(stderr, "sale un auto de ", car_sale.o, "\n")
@@ -130,7 +134,9 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                 if v == car_cambia.d
                                     print(stderr, "llegué","\n")
                                     car_cambia.llego = true
-                                    push!(car_cambia.posicion,Red.position_array[car_cambia.d])
+                                    if animacion
+                                        push!(car_cambia.posicion,Red.position_array[car_cambia.d])
+                                    end
                                 else
                                     u = v
                                     index2 = findall(x->src(x)==u, car_cambia.astarpath)    
@@ -145,20 +151,25 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                 if sca<sts && auto==car_cambia
                                     auto.avance = 0.
                                 end
-                                u = auto.last_node
-                                index = findall(x->src(x)==u, auto.astarpath)
-                                v = dst(auto.astarpath[index][1])
-                                push!(auto.posicion,
-                                Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u])/norm(Red.position_array[v]-Red.position_array[u]))
+                                if animacion
+                                    u = auto.last_node
+                                    index = findall(x->src(x)==u, auto.astarpath)
+                                    v = dst(auto.astarpath[index][1])
+                                    push!(auto.posicion,
+                                    Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u])/norm(Red.position_array[v]-Red.position_array[u]))
+                                end
                             end
-
-                            for auto in [auto for auto in Autos if !(auto.is_out)]
-                                push!(auto.posicion,Red.position_array[auto.o])
+                            if animacion
+                                for auto in [auto for auto in Autos if !(auto.is_out)]
+                                    push!(auto.posicion,Red.position_array[auto.o])
+                                end
                             end
                             
                             Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1], Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);
                         end
-                        return time_array
+                        if animacion
+                            return time_array
+                        end
                     end
         
      
