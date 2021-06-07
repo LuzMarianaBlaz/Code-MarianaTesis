@@ -103,7 +103,7 @@ function sig_ca(Red::network, Autos::Array{auto,1})
 end 
 
 function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
-    time_array = []                
+    time_array = []    
     while (length([auto for auto in Autos if auto.llego]) < length(Autos))
                             sts, car_sale = sig_ts(tiempo_universal, Red, Autos)
                             sca, car_cambia = sig_ca(Red, Autos)
@@ -152,7 +152,10 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                 Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u])/norm(Red.position_array[v]-Red.position_array[u]))
                             end
 
-                    
+                            for auto in [auto for auto in Autos if !(auto.is_out)]
+                                push!(auto.posicion,Red.position_array[auto.o])
+                            end
+                            
                             Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1], Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);
                         end
                         return time_array
