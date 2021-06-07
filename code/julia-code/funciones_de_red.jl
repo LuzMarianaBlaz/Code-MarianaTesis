@@ -103,30 +103,25 @@ end
 function divide_edge!(edge, digraph, position_array)
     u = src(edge)
     v = dst(edge)
-   
-    km1_pos = round.(position_array[u] + (position_array[v] - position_array[u]).*0.1, digits = 3)
-    k_pos = round.(position_array[u] + (position_array[v] - position_array[u]).*0.9, digits = 3)
-    
-    if !(km1_pos in position_array)
-        push!(position_array,km1_pos,k_pos)    
-        add_vertices!(digraph, 2)
-        k = nv(digraph)
-        add_edge!(digraph, u, k-1)
-        add_edge!(digraph, k-1, k)
-        add_edge!(digraph, k, v)
-    else
-        k = findall(x->x==km1_pos, position_array)[1]
-        add_edge!(digraph, u, k)
-        add_edge!(digraph, k, k-1)
-        add_edge!(digraph, k-1, v)
-    end
+    uv_vec = position_array[v] - position_array[u]
 
-    
-    rem_edge!(digraph, edge)
+    if norm(uv_vec) >= 10
+        k_pos = round.(position_array[u] + (uv_vec).*5/norm(uv_vec), digits = 3)
+        push!(position_array, k_pos)    
+        add_vertex!(digraph)
+        k = nv(digraph)
+        add_edge!(digraph, u, k)
+        add_edge!(digraph, k, v)
+        rem_edge!(digraph, edge)
+    end
 end
 
 function make_slow_corners(red,position_array,new_positions=[])
-    k = length(position_array) - length(new_positions) +1 
+    if new_positions == []
+        k = length(position_array)
+    else
+        k = length(position_array) - length(new_positions) +1 
+    end
     position_array = [round.(piece,digits=3) for piece in position_array]
     for element in filter(x -> (src(x) < k || dst(x) < k),collect(edges(red)))
         divide_edge!(element, red, position_array)
