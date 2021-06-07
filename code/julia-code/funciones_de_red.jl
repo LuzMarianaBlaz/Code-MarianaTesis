@@ -106,7 +106,7 @@ function divide_edge!(edge, digraph, position_array)
     uv_vec = position_array[v] - position_array[u]
 
     if norm(uv_vec) >= 10
-        k_pos = round.(position_array[u] + (uv_vec).*5/norm(uv_vec), digits = 3)
+        k_pos = round.(position_array[u] + (uv_vec).*(norm(uv_vec)-5.0)/norm(uv_vec), digits = 3)
         push!(position_array, k_pos)    
         add_vertex!(digraph)
         k = nv(digraph)
