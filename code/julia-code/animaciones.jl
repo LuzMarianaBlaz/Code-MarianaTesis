@@ -1,5 +1,5 @@
-function complete!(autos)
-    max_num = maximum([length(auto.posicion) for auto in autos])
+function complete!(autos, times)
+    max_num = length(times)
     for auto in autos
         dif = max_num - length(auto.posicion)
         append!(auto.posicion, [auto.posicion[end] for i in 1:dif])
@@ -8,12 +8,14 @@ end
 
 
 function continuos_time!(times,autos)
-    complete!(autos)
     coordenadasx_grafica = []
     coordenadasy_grafica = []
 
     times = round.(times, digits = 1)
-    new_times = times[1]:0.1:times[end]+2
+    push!(times,times[end]+3.)
+    complete!(autos,times)
+    new_times = times[1]:0.1:times[end]+5.0
+    
     positions = findall(x -> (x in times), new_times)
     
     for auto in autos
