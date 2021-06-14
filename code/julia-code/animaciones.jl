@@ -11,10 +11,10 @@ function continuos_time!(times,autos)
     coordenadasx_grafica = []
     coordenadasy_grafica = []
 
-    times = round.(times, digits = 2)
+    times = round.(times, digits = 1)
     push!(times,times[end]+3.)
     complete!(autos,times)
-    new_times = times[1]:0.01:times[end]+5.0
+    new_times = times[1]:0.1:times[end]+5.0
     
     positions = findall(x -> (x in times), new_times)
     
