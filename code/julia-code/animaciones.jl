@@ -34,3 +34,57 @@ function continuos_time!(times,autos)
     return new_times, coordenadasx_grafica, coordenadasy_grafica
         
 end
+
+function which_different(A,B)
+    findall(x->x==1, A .!= B)
+end
+
+function plot_digraph(g, attribute_matrix = ones(nv(g),nv(g)), separated_edges = false)
+    fig = plot()
+    
+    c1 = colorant"red"
+    c2 = colorant"blue"
+    
+    if attribute_matrix != ones(nv(g),nv(g))
+        cols = range(c1, stop=c2, length=300)
+    else
+        cols = ["black" for i in 1:ne(g)]
+    end
+    
+    for e in collect(edges(g))
+        u = src(e)
+        v = dst(e)
+
+        pos_u = deepcopy(position_array[u])
+        pos_v = deepcopy(position_array[v])
+        
+        
+        if separated_edges
+        
+            if which_different(pos_u,pos_v)[1] == 1
+                if pos_u[1] < pos_v[1]
+                    pos_u[2] -= 1. 
+                    pos_v[2] -= 1.
+                else
+                    pos_u[2] += 1. 
+                    pos_v[2] += 1.
+                end
+            end
+
+            if which_different(pos_u,pos_v)[1] == 2
+                if pos_u[2] < pos_v[2]
+                    pos_u[1] -= 1. 
+                    pos_v[1] -= 1.
+                else
+                    pos_u[1] += 1. 
+                    pos_v[1] += 1.
+                end
+            end
+        end
+        
+        plot!([pos_u[1],pos_v[1]],[pos_u[2],pos_v[2]],
+            arrow=true, color=cols[floor(Int,attribute_matrix[u,v])+1],
+            linewidth=0.2,label="")
+    end
+    return(fig)
+end
