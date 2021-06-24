@@ -39,7 +39,7 @@ function which_different(A,B)
     findall(x->x==1, A .!= B)
 end
 
-function plot_digraph(g, attribute_matrix = ones(nv(g),nv(g)), separated_edges = false)
+function plot_digraph(g; attribute_matrix = ones(nv(g),nv(g)), separated_edges = false)
     fig = plot()
     
     c1 = colorant"red"
