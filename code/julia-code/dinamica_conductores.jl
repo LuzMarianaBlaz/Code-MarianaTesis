@@ -102,6 +102,47 @@ function sig_ca(Red::network, Autos::Array{auto,1})
     return sca, car
 end 
 
+function which_different(A,B)
+    findall(x->x==1, A .!= B)
+end
+
+function save_position(car, Red, posicion)
+    u = car.last_node
+    v = car.next_node
+
+    pos_u = deepcopy(Red.position_array[u])
+    pos_v = deepcopy(Red.position_array[v])
+
+    difcord = which_different(pos_u,pos_v)
+    if length(difcord) < 1
+        push!(car.posicion,posicion)
+        return
+    end
+
+    if difcord[1] == 1
+        if pos_u[1] < pos_v[1]
+            posicion[2] -= 1. 
+            posicion[2] -= 1.
+        else
+            posicion[2] += 1. 
+            posicion[2] += 1.
+        end
+    end
+
+    if difcord[1] == 2
+        if pos_u[2] < pos_v[2]
+            posicion[1] -= 1. 
+            posicion[1] -= 1.
+        else
+            posicion[1] += 1. 
+            posicion[1] += 1.
+        end
+    end
+
+    push!(car.posicion,posicion)
+end
+
+
 function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,1},animacion=false)
     if animacion
         time_array = []
@@ -135,12 +176,13 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                     print(stderr, "llegué","\n")
                                     car_cambia.llego = true
                                     if animacion
-                                        push!(car_cambia.posicion,Red.position_array[car_cambia.d])
+                                        save_position(car_cambia,Red,Red.position_array[car_cambia.d])
                                     end
                                 else
                                     u = v
                                     index2 = findall(x->src(x)==u, car_cambia.astarpath)    
                                     v = dst(car_cambia.astarpath[index2][1])
+                                    car_cambia.next_node = v
                                     Red.city_matrix[u,v,3] += 1.      
                                 end
                             end
@@ -153,15 +195,11 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                 end
                                 if animacion
                                     u = auto.last_node
-                                    index = findall(x->src(x)==u, auto.astarpath)
-                                    v = dst(auto.astarpath[index][1])
-                                    push!(auto.posicion,
+                                    v = auto.next_node
+
+                                    save_position(auto,Red,
                                     Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u])/norm(Red.position_array[v]-Red.position_array[u]))
-                                end
-                            end
-                            if animacion
-                                for auto in [auto for auto in Autos if !(auto.is_out)]
-                                    push!(auto.posicion,Red.position_array[auto.o])
+
                                 end
                             end
                             
@@ -183,6 +221,7 @@ function restart(Autos, Red)
         auto.llego = false
         auto.last_node = auto.o
         auto.astarpath = update_Astarpath(auto, Red)
+        auto.next_node = dst(auto.astarpath[1])
         auto.posicion = [Red.position_array[auto.o]]
     end
 end
