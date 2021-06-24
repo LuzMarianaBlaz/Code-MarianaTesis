@@ -26,6 +26,7 @@ mutable struct auto
 
     ##Información del nodo del que acaban de salir y el avance respecto a este
     last_node::Int64
+    next_node::Int64
     avance::Float64
     vel::Float64
     posicion::Array{Array{Float64,1},1}
@@ -40,11 +41,12 @@ mutable struct auto
             o, d,red_cuadrada.city_matrix[:,:,1],n -> TimeEuclideanHeuristic(n,
                 d,Red.position_array))
         last_node = o
+        next_node = dst(Astarpath[1])
         avance = 0.
         vel = 0.
         posicion=[Red.position_array[o]]
         is_out = false
         llego = false
-        new(o,d,ts,h,speed_memory,Astarpath,last_node,avance,vel,posicion,is_out,llego)
+        new(o,d,ts,h,speed_memory,Astarpath,last_node,next_node,avance,vel,posicion,is_out,llego)
     end
 end
