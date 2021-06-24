@@ -202,6 +202,12 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
 
                                 end
                             end
+
+                            if animacion
+                                for auto in [auto for auto in Autos if !(auto.is_out)]
+                                    save_position(auto,Red,[NaN,NaN])
+                                end
+                            end
                             
                             Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1], Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);
                         end
