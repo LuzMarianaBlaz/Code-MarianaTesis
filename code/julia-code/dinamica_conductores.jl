@@ -121,21 +121,21 @@ function save_position(car, Red, posicion)
 
     if difcord[1] == 1
         if pos_u[1] < pos_v[1]
-            posicion[2] -= 1. 
-            posicion[2] -= 1.
+            posicion[2] -= 2. 
+            posicion[2] -= 2.
         else
-            posicion[2] += 1. 
-            posicion[2] += 1.
+            posicion[2] += 2. 
+            posicion[2] += 2.
         end
     end
 
     if difcord[1] == 2
         if pos_u[2] < pos_v[2]
-            posicion[1] -= 1. 
-            posicion[1] -= 1.
+            posicion[1] -= 2. 
+            posicion[1] -= 2.
         else
-            posicion[1] += 1. 
-            posicion[1] += 1.
+            posicion[1] += 2. 
+            posicion[1] += 2.
         end
     end
 

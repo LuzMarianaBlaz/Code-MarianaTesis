@@ -63,21 +63,21 @@ function plot_digraph(g; attribute_matrix = ones(nv(g),nv(g)), separated_edges =
         
             if which_different(pos_u,pos_v)[1] == 1
                 if pos_u[1] < pos_v[1]
-                    pos_u[2] -= 1. 
-                    pos_v[2] -= 1.
+                    pos_u[2] -= 2. 
+                    pos_v[2] -= 2.
                 else
-                    pos_u[2] += 1. 
-                    pos_v[2] += 1.
+                    pos_u[2] += 2. 
+                    pos_v[2] += 2.
                 end
             end
 
             if which_different(pos_u,pos_v)[1] == 2
                 if pos_u[2] < pos_v[2]
-                    pos_u[1] -= 1. 
-                    pos_v[1] -= 1.
+                    pos_u[1] -= 2. 
+                    pos_v[1] -= 2.
                 else
-                    pos_u[1] += 1. 
-                    pos_v[1] += 1.
+                    pos_u[1] += 2. 
+                    pos_v[1] += 2.
                 end
             end
         end
