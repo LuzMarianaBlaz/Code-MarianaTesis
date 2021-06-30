@@ -146,6 +146,8 @@ end
 function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,1},animacion=false)
     if animacion
         time_array = []
+        m = size(Red.city_matrix,1)
+        vel_matrix = zeros(m,m)
     end
     while (length([auto for auto in Autos if auto.llego]) < length(Autos))
                             sts, car_sale = sig_ts(tiempo_universal, Red, Autos)
@@ -207,12 +209,13 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                 for auto in [auto for auto in Autos if !(auto.is_out)]
                                     save_position(auto,Red,[NaN,NaN])
                                 end
+                                vel_matrix += Red.city_matrix[:,:,4]
                             end
                             
                             Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1], Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);
                         end
                         if animacion
-                            return time_array
+                            return time_array, vel_matrix/(length(time_array)-1)
                         end
                     end
         
