@@ -59,6 +59,7 @@ function plot_digraph(g; attribute_matrix = ones(nv(g),nv(g)), separated_edges =
             length=floor(Int,maximum(new_matrix1))-floor(Int,minimum(new_matrix2))+1)
     else
         cols = ["black" for i in 1:ne(g)]
+        new_matrix2 = attribute_matrix
     end
     
     for e in collect(edges(g))
