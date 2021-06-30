@@ -46,7 +46,17 @@ function plot_digraph(g; attribute_matrix = ones(nv(g),nv(g)), separated_edges =
     c2 = colorant"blue"
     
     if attribute_matrix != ones(nv(g),nv(g))
-        cols = range(c1, stop=c2, length=300)
+        new_matrix1 = zeros(nv(g),nv(g))
+        new_matrix2 = Inf*ones(nv(g),nv(g))
+        for e in collect(edges(g))
+            u = src(e)
+            v = dst(e)
+            new_matrix1[u,v] = attribute_matrix[u,v]
+            new_matrix2[u,v] = attribute_matrix[u,v]
+        end
+
+        cols = range(c1, stop=c2,
+            length=floor(Int,maximum(new_matrix1))-floor(Int,minimum(new_matrix2))+1)
     else
         cols = ["black" for i in 1:ne(g)]
     end
@@ -82,9 +92,10 @@ function plot_digraph(g; attribute_matrix = ones(nv(g),nv(g)), separated_edges =
             end
         end
         
-        plot!([pos_u[1],pos_v[1]],[pos_u[2],pos_v[2]],
-            arrow=true, color=cols[floor(Int,attribute_matrix[u,v])+1],
-            linewidth=0.2,label="")
+    
+        plot!([pos_u[1],pos_v[1]],[pos_u[2],pos_v[2]], 
+            color=cols[floor(Int,attribute_matrix[u,v])-floor(Int,minimum(new_matrix2))+1],
+            linewidth=2.,label="", aspect_ratio=1)
     end
     return(fig)
 end
