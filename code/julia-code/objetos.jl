@@ -33,7 +33,7 @@ mutable struct auto
 
     #si el auto ya salió o no
     is_out::Bool
-    llego::Bool
+    llego::Float64
     
     function auto(o::Int64, d::Int64, ts::Float64, h::Float64,Red::network)
         speed_memory = Dict{Int64, Float64}()
@@ -46,7 +46,7 @@ mutable struct auto
         vel = 0.
         posicion=[Red.position_array[o]]
         is_out = false
-        llego = false
+        llego = 0.
         new(o,d,ts,h,speed_memory,Astarpath,last_node,next_node,avance,vel,posicion,is_out,llego)
     end
 end

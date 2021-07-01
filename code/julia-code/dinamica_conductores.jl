@@ -77,7 +77,7 @@ function sig_ts(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
 end
 
 function sig_ca(Red::network, Autos::Array{auto,1})
-    Autos = [auto for auto in Autos if (auto.is_out && !(auto.llego))]
+    Autos = [auto for auto in Autos if (auto.is_out && auto.llego==0.)]
     sca = Inf
     car = nothing
                 
@@ -149,7 +149,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
         m = size(Red.city_matrix,1)
         vel_matrix = zeros(m,m)
     end
-    while (length([auto for auto in Autos if auto.llego]) < length(Autos))
+    while (length([auto for auto in Autos if auto.llego!=0.]) < length(Autos))
                             sts, car_sale = sig_ts(tiempo_universal, Red, Autos)
                             sca, car_cambia = sig_ca(Red, Autos)
                             siguiente_tiempo = min(sts, sca)
@@ -176,7 +176,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                 car_cambia.last_node = v
                                 if v == car_cambia.d
                                     print(stderr, "llegué","\n")
-                                    car_cambia.llego = true
+                                    car_cambia.llego = tiempo_universal
                                     if animacion
                                         save_position(car_cambia,Red,Red.position_array[car_cambia.d])
                                     end
@@ -189,7 +189,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                 end
                             end
         
-                            for auto in [auto for auto in Autos if (auto.is_out && !(auto.llego))]
+                            for auto in [auto for auto in Autos if (auto.is_out && auto.llego==0.)]
                                 auto.avance += auto.vel * siguiente_tiempo
 
                                 if sca<sts && auto==car_cambia
@@ -227,7 +227,7 @@ function restart(Autos, Red)
         auto.avance = 0.
         auto.vel = 0.
         auto.is_out = false
-        auto.llego = false
+        auto.llego = 0.
         auto.last_node = auto.o
         auto.astarpath = update_Astarpath(auto, Red)
         auto.next_node = dst(auto.astarpath[1])
