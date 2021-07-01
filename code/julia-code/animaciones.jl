@@ -55,7 +55,7 @@ function plot_digraph(g; attribute_matrix = ones(nv(g),nv(g)), separated_edges =
     fig = plot()
     
     c1 = colorant"red"
-    c2 = colorant"blue"
+    c2 = colorant"green"
     
     if attribute_matrix != ones(nv(g),nv(g))
         new_matrix1 = zeros(nv(g),nv(g))
