@@ -8,8 +8,10 @@ end
 
 
 function continuos_time!(times,autos)
-    coordenadasx_grafica = []
-    coordenadasy_grafica = []
+    x_out = []
+    y_out = []
+    x_dest=[]
+    y_dest=[]
 
     times = round.(times, digits = 1)
     push!(times,times[end]+3.)
@@ -28,10 +30,20 @@ function continuos_time!(times,autos)
         end
         df = DataFrame(time = new_times, x = xcoords, y = ycoords)
         df = Impute.interp(df)
-        push!(coordenadasx_grafica,df[!,"x"])
-        push!(coordenadasy_grafica,df[!,"y"])
+        size_all = size(df)[1]
+
+        df_out = subset(df, :time => x -> x .< auto.llego)
+        size_out = size(df_out)[1]
+
+        push!(x_out,vcat(df_out[! ,"x"],[NaN for i in 1:(size_all-size_out)]))
+        push!(y_out,vcat(df_out[! ,"y"],[NaN for i in 1:(size_all-size_out)]))
+        
+        df_dest = subset(df, :time => x -> x .>= auto.llego)
+        push!(x_dest,vcat([NaN for i in 1:(size_out)],df_dest[! ,"x"]))
+        push!(y_dest,vcat([NaN for i in 1:(size_out)],df_dest[! ,"y"]))
+        
     end
-    return new_times, coordenadasx_grafica, coordenadasy_grafica
+    return new_times, x_out, y_out, x_dest, y_dest
         
 end
 
