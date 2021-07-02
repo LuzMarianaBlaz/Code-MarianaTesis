@@ -157,9 +157,9 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                             if animacion
                                 push!(time_array, tiempo_universal)
                             end
-                            print(stderr, tiempo_universal,"\n")
+                            #print(stderr, tiempo_universal,"\n")
                             if sts < sca
-                                print(stderr, "sale un auto de ", car_sale.o, "\n")
+                                #print(stderr, "sale un auto de ", car_sale.o, "\n")
                                 car_sale.is_out = true
                                 u = car_sale.o
                                 v = dst(car_sale.astarpath[1])
@@ -170,12 +170,12 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
 
                                 index1 = findall(x->src(x)==u, car_cambia.astarpath)    
                                 v = dst(car_cambia.astarpath[index1][1])
-                                print(stderr,"cambio en la esquina ",v,"\n")
+                                #print(stderr,"cambio en la esquina ",v,"\n")
                                 Red.city_matrix[u,v,3] -= 1.
                         
                                 car_cambia.last_node = v
                                 if v == car_cambia.d
-                                    print(stderr, "llegué","\n")
+                                    #print(stderr, "llegué","\n")
                                     car_cambia.llego = tiempo_universal
                                     if animacion
                                         save_position(car_cambia,Red,Red.position_array[car_cambia.d])
