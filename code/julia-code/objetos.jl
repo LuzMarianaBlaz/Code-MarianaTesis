@@ -38,7 +38,7 @@ mutable struct auto
     function auto(o::Int64, d::Int64, ts::Float64, h::Float64,Red::network)
         speed_memory = Dict{Int64, Float64}()
         Astarpath=LightGraphs.a_star(Red.digraph,
-            o, d,red_cuadrada.city_matrix[:,:,1],n -> TimeEuclideanHeuristic(n,
+            o, d,Red.city_matrix[:,:,1],n -> TimeEuclideanHeuristic(n,
                 d,Red.position_array))
         last_node = o
         next_node = dst(Astarpath[1])
