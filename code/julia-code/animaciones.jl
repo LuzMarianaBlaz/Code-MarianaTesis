@@ -7,16 +7,17 @@ function complete!(autos, times)
 end
 
 
+
 function continuos_time!(times,autos)
     x_out = []
     y_out = []
     x_dest=[]
     y_dest=[]
 
-    times = round.(times, digits = 1)
-    push!(times,times[end]+3.)
+    times = round.(times, digits = 2)
+    push!(times,times[end]+5.)
     complete!(autos,times)
-    new_times = times[1]:0.1:times[end]+5.0
+    new_times = times[1]:0.01:times[end]
     
     positions = findall(x -> (x in times), new_times)
     
@@ -31,16 +32,22 @@ function continuos_time!(times,autos)
         df = DataFrame(time = new_times, x = xcoords, y = ycoords)
         df = Impute.interp(df)
         size_all = size(df)[1]
-
-        df_out = subset(df, :time => x -> x .< auto.llego)
-        size_out = size(df_out)[1]
-
-        push!(x_out,vcat(df_out[! ,"x"],[NaN for i in 1:(size_all-size_out)]))
-        push!(y_out,vcat(df_out[! ,"y"],[NaN for i in 1:(size_all-size_out)]))
         
-        df_dest = subset(df, :time => x -> x .>= auto.llego)
-        push!(x_dest,vcat([NaN for i in 1:(size_out)],df_dest[! ,"x"]))
-        push!(y_dest,vcat([NaN for i in 1:(size_out)],df_dest[! ,"y"]))
+        dest = position_array[auto.d]
+
+        df_llego = subset(subset(df, :x => x -> x .==dest[1]),:y => y -> y .==dest[2])
+        
+        times_llego = df_llego[!,"time"]
+        size_llego = size(df_llego)[1]
+        
+        df_out = subset(df, :time => t -> in(times_llego).(t) .== 0)
+
+
+        push!(x_out,vcat(df_out[! ,"x"],[NaN for i in 1:(size_llego)]))
+        push!(y_out,vcat(df_out[! ,"y"],[NaN for i in 1:(size_llego)]))
+        
+        push!(x_dest,vcat([NaN for i in 1:(size_all-size_llego)],df_llego[! ,"x"]))
+        push!(y_dest,vcat([NaN for i in 1:(size_all-size_llego)],df_llego[! ,"y"]))
         
     end
     return new_times, x_out, y_out, x_dest, y_dest
