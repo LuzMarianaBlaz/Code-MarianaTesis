@@ -3,10 +3,10 @@ function complete!(autos, times)
     for auto in autos
         dif = max_num - length(auto.posicion)
         append!(auto.posicion, [auto.posicion[end] for i in 1:dif])
+        auto.posicion = auto.posicion[indexin(unique(times), times)]
+
     end
 end
-
-
 
 function continuos_time!(times,autos)
     x_out = []
@@ -17,6 +17,8 @@ function continuos_time!(times,autos)
     times = round.(times, digits = 2)
     push!(times,times[end]+5.)
     complete!(autos,times)
+    times = times[indexin(unique(times), times)]
+    
     new_times = times[1]:0.01:times[end]
     
     positions = findall(x -> (x in times), new_times)
