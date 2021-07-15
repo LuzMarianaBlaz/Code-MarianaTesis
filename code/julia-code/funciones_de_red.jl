@@ -15,28 +15,51 @@ function mySimpleGraph(n::Integer)
 end
 
 
-function SquareDiGraph(n::Integer)
+function SquareDiGraph(n::Integer; doble_sentido = false)
     red = SimpleDiGraph(n^2)
-    
-    for i in 1:n^2
-        i_neighboors = []
-        if i > n
-            push!(i_neighboors, i-n)
+    if doble_sentido
+        for i in 1:n^2
+            i_neighboors = []
+            
+            if i > n
+                push!(i_neighboors, i-n)
+            end
+            if i ≤ n*(n-1)
+                push!(i_neighboors, i+n)
+            end
+            if i%n != 1
+                push!(i_neighboors, i-1)
+            end
+            if i%n != 0
+                push!(i_neighboors, i+1)
+            end
+            for neighboor in i_neighboors
+                add_edge!(red, i, neighboor)
+            end
         end
-        if i ≤ n*(n-1)
-            push!(i_neighboors, i+n)
-        end
-        if i%n != 1
-            push!(i_neighboors, i-1)
-        end
-        if i%n != 0
-            push!(i_neighboors, i+1)
-        end
-        for neighboor in i_neighboors
-            add_edge!(red, i, neighboor)
+    else
+        set1 = vcat([i for i in 1:2:n], [i for i in n+1:2:2*n-1],[0])                
+        for i in 1:n^2
+            i_neighboors = []
+            if i > n && (i%(n*2) in set1)
+                push!(i_neighboors, i-n)
+            end
+            if i ≤ n*(n-1) && !(i%(n*2) in set1)
+                push!(i_neighboors, i+n)
+            end
+            if i%n != 1 && (i%(n*2) in 1:n)
+                push!(i_neighboors, i-1)
+            end
+            if i%n != 0 && !(i%(n*2) in 1:n)
+                push!(i_neighboors, i+1)
+            end
+            for neighboor in i_neighboors
+                add_edge!(red, i, neighboor)
+            end
         end
     end
-    position_array = [[(i-1)%n, div(i-.01,n)] for i in 1:n^2]*100. #las calles miden 100m;
+
+    position_array = [[(i-1)%n, div(i-0.01,n)] for i in 1:n^2]*100. #las calles miden 100m;
     return red, position_array, distance_matrix(position_array)
 end
 
