@@ -42,7 +42,6 @@ function SquareDiGraph(n::Integer; doble_sentido = false)
         if n%2!=0
             push!(set1,0)
         end        
-        print(set1)        
         for i in 1:n^2
             i_neighboors = []
             if i > n && (i%(n*2) in set1)
