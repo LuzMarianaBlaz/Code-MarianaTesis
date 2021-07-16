@@ -38,7 +38,11 @@ function SquareDiGraph(n::Integer; doble_sentido = false)
             end
         end
     else
-        set1 = vcat([i for i in 1:2:n], [i for i in n+1:2:2*n-1],[0])                
+        set1 = vcat([i for i in 1:2:n], [i for i in n+1:2:2*n-1])
+        if n%2!=0
+            push!(set1,0)
+        end        
+        print(set1)        
         for i in 1:n^2
             i_neighboors = []
             if i > n && (i%(n*2) in set1)
@@ -52,6 +56,18 @@ function SquareDiGraph(n::Integer; doble_sentido = false)
             end
             if i%n != 0 && !(i%(n*2) in 1:n)
                 push!(i_neighboors, i+1)
+            end
+            if i < n 
+                push!(i_neighboors, i+1)
+            end
+            if i%n == 1
+                push!(i_neighboors, i+n)
+            end
+            if i%n == 0
+                objeto = (n%2==0 && i!=n) ? i-n : (n%2==1 && i!=n*n) ? i+n : 7
+                if objeto != 7
+                    push!(i_neighboors,objeto)
+                end
             end
             for neighboor in i_neighboors
                 add_edge!(red, i, neighboor)
