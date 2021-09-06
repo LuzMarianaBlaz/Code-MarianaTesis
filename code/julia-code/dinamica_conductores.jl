@@ -42,63 +42,78 @@ end
 
 function sig_ts(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
     
-    Autos = [auto for auto in Autos if !(auto.is_out)]
-    p=sortperm([auto.ts for auto in Autos])
-    Autos = Autos[p]
+    Estacionados = [auto for auto in Autos if !(auto.is_out)]
+    p=sortperm([auto.ts for auto in Estacionados])
+    Estacionados = Estacionados[p]
 
-    if length(Autos) > 0
-        u = Autos[1].o
-        v = dst(Autos[1].astarpath[1])
+    if length(Estacionados) > 0
+        u = Estacionados[1].o
+        v = dst(Estacionados[1].astarpath[1])
         #si la calle a la que debe salir tiene espacio:
         if Red.city_matrix[u,v,3] + 1 < Red.city_matrix[u,v,2] 
-            sts = Autos[1].ts-tiempo_universal
-            car = Autos[1]
+            sts = Estacionados[1].ts-tiempo_universal
+            car = Estacionados[1]
         else 
-            for auto in Autos 
+            for auto in Estacionados 
                 if auto.o == u & v == dst(auto.astarpath[1])
                     auto.ts = auto.ts + 10.
                 end
             end
                     
-            p=sortperm([auto.ts for auto in Autos])
-            Autos = Autos[p]
-            if Autos != Autos[p]
-                sts, car = sig_ts(tiempo_universal, Red, Autos)
+            p=sortperm([auto.ts for auto in Estacionados])
+            Estacionados = Estacionados[p]
+            if Estacionados != Estacionados[p]
+                sts, car = sig_ts(tiempo_universal, Red, Estacionados)
             else
                 sts=Inf
                 car = nothing 
+                #print("ningún auto puede salir \n")
             end
         end
     else
         sts = Inf
         car = nothing
+        #print("Ya salieron todos los autos \n")
     end
     return sts, car
 end
 
 function sig_ca(Red::network, Autos::Array{auto,1})
-    Autos = [auto for auto in Autos if (auto.is_out && auto.llego==0.)]
+    Afuera = [auto for auto in Autos if (auto.is_out && auto.llego==0.)]
     sca = Inf
     car = nothing
                 
-    for auto in Autos  
+    for auto in Afuera  
         ## debe comprobar primero si puede hacer el cambio
         u = auto.last_node
-        index = findall(x->src(x)==u, auto.astarpath)    
-        v = dst(auto.astarpath[index][1])
-        
-        if Red.city_matrix[u,v,3] + 1 < Red.city_matrix[u,v,2]
-
+        v = auto.next_node
+        index = findall(x->src(x)==v, auto.astarpath)    
+        if length(index) == 0 
             tiempo = Red.city_matrix[u,v,4]
             longitud = norm(Red.position_array[u]-Red.position_array[v])
             auto.vel = longitud/tiempo
-        
             if tiempo * (longitud - auto.avance)/longitud < sca
                 sca = tiempo * (longitud - auto.avance)/longitud
                 car = auto
             end
+        else
+            w = dst(auto.astarpath[index][1])
+            
+            if Red.city_matrix[v,w,3] + 1 < Red.city_matrix[v,w,2]
+                tiempo = Red.city_matrix[u,v,4]
+                longitud = norm(Red.position_array[u]-Red.position_array[v])
+                auto.vel = longitud/tiempo
+            
+                if tiempo * (longitud - auto.avance)/longitud < sca
+                    sca = tiempo * (longitud - auto.avance)/longitud
+                    car = auto
+                end
+            end
         end
     end
+    #if car === nothing
+        #print("ningun auto puede hacer cambio de arista \n")
+    #end
     return sca, car
 end 
 
@@ -158,6 +173,9 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                                 push!(time_array, tiempo_universal)
                             end
                             #print(stderr, tiempo_universal,"\n")
+                            #if car_cambia === nothing && car_sale === nothing
+                                #print("Completa saturación \n")
+                            #end
                             if sts < sca
                                 #print(stderr, "sale un auto de ", car_sale.o, "\n")
                                 car_sale.is_out = true
@@ -233,4 +251,10 @@ function restart(Autos, Red)
         auto.next_node = dst(auto.astarpath[1])
         auto.posicion = [Red.position_array[auto.o]]
     end
+end
+
+function restart_red(Red)
+    m,k,l = size(Red.city_matrix)
+    Red.city_matrix[:,:,3] = zeros(m,m)
+    Red.city_matrix[:,:,4] = BPR.(city_matrix[:,:,1], city_matrix[:,:,3],city_matrix[:,:,2]);
 end
