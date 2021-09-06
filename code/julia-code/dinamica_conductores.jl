@@ -50,7 +50,7 @@ function sig_ts(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
         u = Autos[1].o
         v = dst(Autos[1].astarpath[1])
         #si la calle a la que debe salir tiene espacio:
-        if Red.city_matrix[u,v,3] < Red.city_matrix[u,v,2] 
+        if Red.city_matrix[u,v,3] + 1 < Red.city_matrix[u,v,2] 
             sts = Autos[1].ts-tiempo_universal
             car = Autos[1]
         else 
@@ -87,7 +87,7 @@ function sig_ca(Red::network, Autos::Array{auto,1})
         index = findall(x->src(x)==u, auto.astarpath)    
         v = dst(auto.astarpath[index][1])
         
-        if Red.city_matrix[u,v,3] < Red.city_matrix[u,v,2]
+        if Red.city_matrix[u,v,3] + 1 < Red.city_matrix[u,v,2]
 
             tiempo = Red.city_matrix[u,v,4]
             longitud = norm(Red.position_array[u]-Red.position_array[v])
