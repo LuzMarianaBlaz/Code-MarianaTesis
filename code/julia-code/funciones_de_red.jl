@@ -3,6 +3,8 @@ using GraphPlot
 using LightGraphs
 using LinearAlgebra
 
+street_len = 40.0
+
 function distance_matrix(x)
     return [norm(x[i]-x[j]) for i in 1:length(x), j in 1:length(x)]
 end
@@ -10,7 +12,7 @@ end
 
 function mySimpleGraph(n::Integer)
     red = SimpleDiGraph(n,round(Int,n*(n-1)/20))
-    position_array = [rand(2)*100. for i in 1:n]
+    position_array = [rand(2)*street_len for i in 1:n]
     return red, position_array, distance_matrix(position_array)
 end
 
@@ -74,7 +76,7 @@ function SquareDiGraph(n::Integer; doble_sentido = false)
         end
     end
 
-    position_array = [[(i-1)%n, div(i-0.01,n)] for i in 1:n^2]*100. #las calles miden 100m;
+    position_array = [[(i-1)%n, div(i-0.01,n)] for i in 1:n^2]*street_len #las calles miden <street_len>m;
     return red, position_array, distance_matrix(position_array)
 end
 
@@ -83,7 +85,7 @@ function horizontal_range(diag_start, ordenada, pendiente, sidenum, step = 100.)
     rang = []
     u = diag_start[2]
 
-    while u >= 0. && ((u-ordenada)/pendiente) < (sidenum-1.)*100.
+    while u >= 0. && ((u-ordenada)/pendiente) < (sidenum-1.)*street_len
         push!(rang,round.([(u-ordenada)/pendiente, u], digits=5))
         u -= step
     end
@@ -92,9 +94,9 @@ end
 
 function vertical_range(diag_start, ordenada, pendiente, sidenum, step = 100.)
     rang = []
-    u = round(diag_start[1]/100, digits=0)+100.
+    u = round(diag_start[1]/street_len, digits=0)+street_len
 
-    while u <= (sidenum-1)*100
+    while u <= (sidenum-1)*street_len
         push!(rang,[u,round(pendiente*u+ordenada,digits=5)])
         u += step
     end
@@ -105,9 +107,9 @@ function paste_diagonal(nw, position_array, new_positions)
     original_number = nv(nw)
     
     for element in new_positions
-        coord = findall(x -> x %100. == 0., element)[1]
+        coord = findall(x -> x %street_len == 0., element)[1]
         val = element[coord]
-        vertices = findall(x -> (x[coord] == val && norm(x[coord%2+1]-element[coord%2+1])<100.), position_array)
+        vertices = findall(x -> (x[coord] == val && norm(x[coord%2+1]-element[coord%2+1])<street_len), position_array)
         
         add_vertex!(nw)
         vertex_num = nv(nw)
