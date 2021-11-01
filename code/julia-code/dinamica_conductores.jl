@@ -41,9 +41,9 @@ end
 
 """
     speed(u, v, position_array, speed_memory)
-Returns the estimated speed in edge ``uv`` for a driver given its `speed_memory`,
+Returns the estimated between nodes ``u`` and ``v`` for a driver given its `speed_memory`,
 if there is not previous experience of the driver in such vertices, then it returns
-the maximum speed reported for that edge according to `max_speed`.
+the maximum speed reported between those nodes according to `max_speed`.
 """
 function speed(u::Int,v::Int, 
     position_array::Array{Array{Float64,1},1},
@@ -52,16 +52,23 @@ function speed(u::Int,v::Int,
 end
 
 
+function modify_vels(Auto::auto, Red::network)
+    m,k,l = size(Red.city_matrix)
+    return([speed(i,j,Red.position_array,Auto.speed_memory) for i in 1:m, j in 1:m])
+end
+
 """
     update_Astarpath(auto, red)
 Updates the A* path for a driver (auto) in the network (red), taking into account
 the new information the driver has stored in its `speed_memory`. 
 """
 function update_Astarpath(Auto::auto, Red::network)
-    Auto.astarpath = LightGraphs.a_star(Red.digraph,
-        Auto.o, Auto.d,Red.city_matrix[:,:,1],
-        n -> MemoryHeuristic(n, Auto.d, Red.position_array,
-            Auto.h,Auto.speed_memory))
+    memory_weight_matrix = distance_matrix(Red.position_array)./modify_vels(Auto, Red)
+    estimated_weight_matrix = Red.city_matrix[:,:,1]
+    weight_matrix = (1-Auto.h)*estimated_weight_matrix + Auto.h*memory_weight_matrix
+    return (LightGraphs.a_star(Red.digraph,
+    Auto.o, Auto.d,weight_matrix, n -> MemoryHeuristic(n, Auto.d, Red.position_array,
+    Auto.h,Auto.speed_memory)))
 end
 
 
@@ -229,19 +236,18 @@ end
 
 
 """
-    simulacion!(tiempo_universal, red, autos, animacion)
+    simulacion!(tiempo_universal, red, autos)
 Given the network `red` and an array of drivers `autos`, generates the complete simulation until all drivers reach their destination,
 the simulation goes in discrete steps of time, each one representing an action. Possible actions are:
 - A car leaves its origin.
 - A car changes edge.
 - A car reaches its destination. 
 """
-function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,1},animacion=false)
-    if animacion
-        time_array = []
-        m = size(Red.city_matrix,1)
-        vel_matrix = zeros(m,m)
-    end
+function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
+    time_array = []
+    m = size(Red.city_matrix,1)
+    vel_matrix = zeros(m,m)
+
     # Mientras haya autos que no hayan llegado a su destino
     while (length([auto for auto in Autos if auto.llego!=0.]) < length(Autos))
         # Se calculan el siguiente cambio de arista y el siguiente tiempo
@@ -250,10 +256,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
         siguiente_tiempo = min(sts, sca)
         # el tiempo universal se adelanta por siguiente_tiempo
         tiempo_universal += siguiente_tiempo
-
-        if animacion
-            push!(time_array, tiempo_universal)
-        end
+        push!(time_array, tiempo_universal)
 
         # si lo que sigue es una salida de destino
         if sts < sca
@@ -276,9 +279,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             # si con esta acción el auto llega a destino se registra el tiempo en el que llegó
             if v == car_cambia.d
                 car_cambia.llego = tiempo_universal
-                if animacion
-                    save_position(car_cambia,Red,Red.position_array[car_cambia.d])
-                end
+                save_position(car_cambia,Red,Red.position_array[car_cambia.d])
             # si no ha llegado y cambia de arista se amenta el uno el número de autos a la arista a la que va
             else
                 index2 = findall(x->src(x)==v, car_cambia.astarpath)    
@@ -297,27 +298,23 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                 auto.avance = 0.
             end
             
-            if animacion
-                u = auto.last_node
-                v = auto.next_node
-                save_position(auto,Red,
-                Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u])/norm(Red.position_array[v]-Red.position_array[u]))
-            end
+            u = auto.last_node
+            v = auto.next_node
+            save_position(auto,Red,
+            Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u])/norm(Red.position_array[v]-Red.position_array[u]))
         end
-        if animacion
-            for auto in [auto for auto in Autos if !(auto.is_out)]
-                save_position(auto,Red,[NaN,NaN])
-            end
-            dist_matrix = distance_matrix(Red.position_array)
-            vel_matrix += dist_matrix./Red.city_matrix[:,:,4]
+
+        for auto in [auto for auto in Autos if !(auto.is_out)]
+            save_position(auto,Red,[NaN,NaN])
         end
+        dist_matrix = distance_matrix(Red.position_array)
+        vel_matrix += dist_matrix./Red.city_matrix[:,:,4]
         
         # por último se actualizan los tiempos de recorrido en la red
         Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1], Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);
     end
-    if animacion
-        return time_array, vel_matrix/(length(time_array)-1)
-    end
+    
+    return time_array, vel_matrix/(length(time_array)-1)
 end
         
 """
