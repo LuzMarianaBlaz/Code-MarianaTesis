@@ -175,13 +175,25 @@ function EuclideanHeuristic(i::Integer, j::Integer,
 end
 
 
+"""
+    TimeEuclideanHeuristic(i, j, position_array)
+A function that estimates the time from vertex ``i`` to vertex ``j``
+if you were in a straight line path, at the maximum speed for those vertices.
+"""
 #### Heuristics to include in A* ###
 function TimeEuclideanHeuristic(i::Integer, j::Integer,
     position_array::Array{Array{Float64,1},1})::Float64
-    vel = speed(i,j,position_array)
+    vel = max_speed(i,j,position_array)
     return norm(position_array[i]-position_array[j])/vel
 end
 
+
+"""
+    MemoryHeuristic(i, j, position_array, h, )
+A function that estimates the time from vertex ``i`` to vertex ``j``
+if you were in a straight line path, calculated using the speed memory of a driver
+the estimation is made using the formula ``(1-h)*estimated time + h*remembered time``.
+"""
 function MemoryHeuristic(i::Int64, j::Int64,
     position_array::Array{Array{Float64,1},1},h::Float64,
     speed_memory::Dict{Int,Float64}=Dict{Int,Float64})::Float64
