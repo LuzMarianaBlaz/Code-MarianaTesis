@@ -308,13 +308,13 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             save_position(auto,Red,[NaN,NaN])
         end
         dist_matrix = distance_matrix(Red.position_array)
-        vel_matrix += dist_matrix./Red.city_matrix[:,:,4]
         
         # por último se actualizan los tiempos de recorrido en la red
         Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1], Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);
+        vel_matrix += dist_matrix./Red.city_matrix[:,:,4];
     end
     
-    return time_array, vel_matrix/(length(time_array)-1)
+    return time_array, vel_matrix/(length(time_array))
 end
         
 """
@@ -322,6 +322,7 @@ end
 This function restarts the newtork and the cars array to start a new simulation
 """                         
 function restart(Autos, Red)
+    n = 0
     for auto in Autos
         auto.avance = 0.
         auto.vel = 0.
@@ -331,12 +332,15 @@ function restart(Autos, Red)
         old_astar = auto.astarpath
         auto.astarpath = update_Astarpath(auto, Red)
         if old_astar != auto.astarpath
-            print("a path changed")
+            n += 1
         end
         auto.next_node = dst(auto.astarpath[1])
         auto.posicion = [Red.position_array[auto.o]]
     end
+    print(n, " cars changed A* path \n")
     m,k,l = size(Red.city_matrix)
     Red.city_matrix[:,:,3] = zeros(m,m)
-    Red.city_matrix[:,:,4] = BPR.(city_matrix[:,:,1], city_matrix[:,:,3],city_matrix[:,:,2]);    
+    Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1],
+        Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);   
+    return n 
 end
