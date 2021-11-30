@@ -1,5 +1,6 @@
 using DataFrames, GraphPlot, Impute, Plots, Colors, Statistics, Random, Distributions
-dir = "../Mariana-Paquete/Mariana-Basefunc/"
+dir = "/Users/Mariana/Documents/Code-MarianaTesis/code/julia-code/Mariana-Paquete/Mariana-Basefunc/"
+#dir = "../Mariana-Paquete/Mariana-Basefunc/"
 
 include(dir*"funciones_de_red.jl")
 include(dir*"objetos.jl")
@@ -7,16 +8,16 @@ include(dir*"dinamica_conductores.jl")
 include(dir*"animaciones.jl")
 
 # Parametros
-tamano_red = 5;
+tamano_red = TAMANORED;
 doble_sentido = true;
 center_h_dist = 0.5;
 sd_h_dist = 0;
 h_distribution = Normal(center_h_dist, sd_h_dist);
-n_cars = 2000;
+n_cars = NCARS;
 ti = 0.0;
 tf = 150;
 max_n_dias = 200;
-path_csv = "test.csv"
+path_csv = OUTFILEMARIANA;
 
 # Generacion de la red
 red_cuadrada = create_square_network(tamano_red, both_ways=doble_sentido);
