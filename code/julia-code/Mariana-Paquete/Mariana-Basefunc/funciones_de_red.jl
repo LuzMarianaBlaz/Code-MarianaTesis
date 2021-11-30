@@ -202,3 +202,32 @@ function MemoryHeuristic(i::Int64, j::Int64,
     memory_part = distance/speed(i,j,position_array,speed_memory)
     return (1-h)*estimation_part + h*memory_part
 end
+
+"""
+    create_square_network(side_number, both_ways)
+generates a complete network object, that contains a LightGraphs digraph, a position array
+and a city matrix, a 3D object that contains information about:
+- Minimum time to go trough each edge.
+- Capacity of each edge.
+- Number of cars in each one of the edges. It starts at cero.
+- Real time to go trough each edge, following the BPR function. At the beginning is the 
+    same as the minimum time.
+
+The digraph created will be an square network with *side_number* of nodes in each side,
+and will be slow in the corners.
+You can choose if the streets are both-ways or not using the *both_ways* parameter
+(default value: one way.)
+"""
+function create_square_network(side_number::Integer; both_ways=true)
+    SquareNet, position_array, dist_matrix = SquareDiGraph(side_number, doble_sentido=both_ways);
+    SquareNet, position_array, dist_matrix = make_slow_corners(SquareNet, position_array, dist_matrix);
+    
+    m = nv(SquareNet);
+    city_matrix = zeros(m,m,4);
+    f = x -> [speed(i,j,x) for i in 1:length(x),j in 1:length(x)];
+    city_matrix[:,:,1] = dist_matrix./f(position_array);
+    city_matrix[:,:,2] = dist_matrix.*3/5;
+    city_matrix[:,:,4] = BPR.(city_matrix[:,:,1], city_matrix[:,:,3],city_matrix[:,:,2]);
+    red_cuadrada=network(SquareNet,position_array,city_matrix);
+    return red_cuadrada
+end

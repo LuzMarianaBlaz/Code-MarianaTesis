@@ -50,3 +50,18 @@ mutable struct auto
         new(o,d,ts,h,speed_memory,Astarpath,last_node,next_node,avance,vel,posicion,is_out,llego)
     end
 end
+
+function generate_auto(m,t,red, h_distribution)
+    o = rand(1:m)
+    d = collect(1:m)
+    splice!(d,o)
+    d = d[rand(1:end)]
+    h = rand(h_distribution) #h es la porporción que corresponde a la memoria
+    return auto(o,d,t,h,red)
+end
+
+function generate_autos(m, red, n_cars, ti, tf, h_dist)
+    step = (tf-ti)/(n_cars-1)
+    autos = [generate_auto(m,t,red, h_dist) for t in collect(ti:step:tf)]
+    return autos
+end

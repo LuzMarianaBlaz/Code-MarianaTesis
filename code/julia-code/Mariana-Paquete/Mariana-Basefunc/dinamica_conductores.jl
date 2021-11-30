@@ -344,3 +344,8 @@ function restart(Autos, Red)
         Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);   
     return n 
 end
+
+function get_avg_vel(autos)
+    avg_vels = [mean(values(auto.speed_memory)) for auto in autos]
+    return minimum(avg_vels), mean(avg_vels)
+end
