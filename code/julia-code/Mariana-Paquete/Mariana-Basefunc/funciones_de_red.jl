@@ -226,7 +226,7 @@ function create_square_network(side_number::Integer; both_ways=true)
     city_matrix = zeros(m,m,4);
     f = x -> [speed(i,j,x) for i in 1:length(x),j in 1:length(x)];
     city_matrix[:,:,1] = dist_matrix./f(position_array);
-    city_matrix[:,:,2] = dist_matrix.*3/5;
+    city_matrix[:,:,2] = dist_matrix./5;
     city_matrix[:,:,4] = BPR.(city_matrix[:,:,1], city_matrix[:,:,3],city_matrix[:,:,2]);
     red_cuadrada=network(SquareNet,position_array,city_matrix);
     return red_cuadrada
