@@ -1,5 +1,5 @@
-using DataFrames, GraphPlot, Impute, Plots, Colors, Statistics, Random, Distributions
-dir = "/Users/Mariana/Documents/Code-MarianaTesis/code/julia-code/Mariana-Paquete/Mariana-Basefunc/"
+using DataFrames, CSV, GraphPlot, Impute, Plots, Colors, Statistics, Random, Distributions
+dir = "/home/aramis/Mariana/Paquete/Basefunc/"
 #dir = "../Mariana-Paquete/Mariana-Basefunc/"
 
 include(dir*"funciones_de_red.jl")
@@ -9,7 +9,7 @@ include(dir*"animaciones.jl")
 
 # Parametros
 tamano_red = TAMANORED;
-doble_sentido = true;
+doble_sentido = false;
 center_h_dist = 0.5;
 sd_h_dist = 0;
 h_distribution = Normal(center_h_dist, sd_h_dist);
@@ -17,7 +17,7 @@ n_cars = NCARS;
 ti = 0.0;
 tf = 150;
 max_n_dias = 200;
-path_csv = OUTFILEMARIANA;
+path_csv = "OUTFILEMARIANA";
 
 # Generacion de la red
 red_cuadrada = create_square_network(tamano_red, both_ways=doble_sentido);
@@ -36,7 +36,7 @@ avg_vels = [];
 cars_changing = [];
 n_simulacion = 200;
 
-while n_simulacion > 0 
+while day_simulacion > 101 
     print("día $(day_simulacion) \n")
     times, vels = simulacion!(0., red_cuadrada, autos);
     min_vel, avg_vel = get_avg_vel(autos)
@@ -48,14 +48,14 @@ while n_simulacion > 0
     global n_simulacion = restart(autos, red_cuadrada)
     push!(cars_changing, n_simulacion)
         
-    if old_n == n_simulacion
-        break
-    end
+    #if old_n == n_simulacion
+        #break
+    #end
         
     global day_simulacion += 1
-    if day_simulacion == max_n_dias
-        break
-    end
+    #if day_simulacion == max_n_dias
+        #break
+    #end
 end
 
 df = DataFrame(min_vel = min_vels, 
@@ -63,5 +63,4 @@ df = DataFrame(min_vel = min_vels,
                cars_changed = cars_changing
                );
 
-using CSV
 CSV.write(path_csv, df)
