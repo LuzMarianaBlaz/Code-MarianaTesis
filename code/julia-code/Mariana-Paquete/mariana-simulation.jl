@@ -35,32 +35,38 @@ min_vels = [];
 avg_vels = [];
 cars_changing = [];
 n_simulacion = 200;
+avg_time = [];
+max_time = [];
+random_time = [];
+index_changers = [];
 
 while day_simulacion > 101 
     print("día $(day_simulacion) \n")
     times, vels = simulacion!(0., red_cuadrada, autos);
     min_vel, avg_vel = get_avg_vel(autos)
+    t_cars = get_avg_times(autos)
     push!(min_vels,min_vel)
     push!(avg_vels,avg_vel)
+    push!(avg_time, mean(t_cars))
+    push!(max_time, maximum(t_cars))
+    push!(random_time, t_cars[Int(floor(n_cars/2))]
         
     print(min_vel," ", avg_vel,"\n")
-    old_n = n_simulacion
-    global n_simulacion = restart(autos, red_cuadrada)
+    n_simulacion, inexes = restart(autos, red_cuadrada)
     push!(cars_changing, n_simulacion)
-        
-    #if old_n == n_simulacion
-        #break
-    #end
+    push!(index_changers, indexes)
+
         
     global day_simulacion += 1
-    #if day_simulacion == max_n_dias
-        #break
-    #end
 end
 
 df = DataFrame(min_vel = min_vels, 
                avg_vel = avg_vels,
-               cars_changed = cars_changing
+               cars_changed = cars_changing,
+                max_time = max_time,
+                avg_time = avg_time,
+                random_time = random_time,
+                indexes = index_changers
                );
 
 CSV.write(path_csv, df)
