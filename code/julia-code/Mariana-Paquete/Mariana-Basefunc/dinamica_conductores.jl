@@ -34,7 +34,7 @@ the maximum speed reported for that vertex according to `max_speed`.
 """
 function speed(u::Int, 
     position_array::Array{Array{Float64,1},1},
-    speed_memory::Dict{Int,Float64}=Dict{Int,Float64}())
+    speed_memory=Dict{Int64,Float64}())
     return get(speed_memory, u, max_speed(u, position_array))
 end
 
@@ -47,14 +47,15 @@ the maximum speed reported between those nodes according to `max_speed`.
 """
 function speed(u::Int,v::Int, 
     position_array::Array{Array{Float64,1},1},
-    speed_memory::Dict{Int,Float64}=Dict{Int,Float64}())
+    speed_memory=Dict{Int64,Float64}())
     return (speed(u, position_array, speed_memory)+speed(v,position_array,speed_memory))/2
 end
 
 
 function modify_vels(Auto::auto, Red::network)
     m,k,l = size(Red.city_matrix)
-    return([speed(i,j,Red.position_array,Auto.speed_memory) for i in 1:m, j in 1:m])
+    mean_speed_memory = mean_vel_from_memories(Auto.speed_memories)
+    return([speed(i,j,Red.position_array, mean_speed_memory) for i in 1:m, j in 1:m])
 end
 
 """
@@ -66,9 +67,11 @@ function update_Astarpath(Auto::auto, Red::network)
     memory_weight_matrix = distance_matrix(Red.position_array)./modify_vels(Auto, Red)
     estimated_weight_matrix = Red.city_matrix[:,:,1]
     weight_matrix = (1-Auto.h)*estimated_weight_matrix + Auto.h*memory_weight_matrix
+    mean_speed_memory = mean_vel_from_memories(Auto.speed_memories)
+    
     return (LightGraphs.a_star(Red.digraph,
     Auto.o, Auto.d,weight_matrix, n -> MemoryHeuristic(n, Auto.d, Red.position_array,
-    Auto.h,Auto.speed_memory)))
+    Auto.h,mean_speed_memory)))
 end
 
 
@@ -322,7 +325,6 @@ end
 This function restarts the newtork and the cars array to start a new simulation
 """                         
 function restart(Autos, Red)
-    n = 0
     i = 0
     indexes=[]
     for auto in Autos
@@ -332,29 +334,50 @@ function restart(Autos, Red)
         auto.is_out = false
         auto.llego = 0.
         auto.last_node = auto.o
+        auto.speed_memories[2:7] = auto.speed_memories[1:6]
+        auto.speed_memories[1] = auto.speed_memory
         old_astar = auto.astarpath
         auto.astarpath = update_Astarpath(auto, Red)
         if old_astar != auto.astarpath
-            n += 1
             push!(indexes,i)
         end
         auto.next_node = dst(auto.astarpath[1])
         auto.posicion = [Red.position_array[auto.o]]
+        
+        auto.speed_memory = Dict{Int64, Float64}()
     end
-    print(n, " cars changed A* path \n")
     m,k,l = size(Red.city_matrix)
     Red.city_matrix[:,:,3] = zeros(m,m)
     Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1],
         Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);   
-    return n, indexes
+    return indexes
 end
 
-function get_avg_vel(autos)
-    avg_vels = [mean(values(auto.speed_memory)) for auto in autos]
-    return minimum(avg_vels), mean(avg_vels)
+function vels_summary(autos)
+    return [mean(values(auto.speed_memory)) for auto in autos]
 end
 
-function get_avg_times(autos)
-    times = [auto.llego-auto.ts for auto in autos]
-    return times
+function times_summary(autos)
+    return [auto.llego-auto.ts for auto in autos]
+end
+
+function mean_vel_from_memories(speed_memories)
+    key_arr = []
+    for dict in speed_memories
+        key_arr=union(key_arr,keys(dict))
+    end
+
+    new_dict = Dict() 
+    for key in key_arr
+        vals = zeros(7)
+        count = 0
+        for dict in speed_memories
+            count += 1
+            vals[count]=get(dict, key, 0)
+        end
+        n = length(findall(x->x!=0,vals))
+        val = sum(vals)/n
+        new_dict[key]=val
+    end
+    return new_dict
 end
