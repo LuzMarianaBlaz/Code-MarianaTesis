@@ -19,6 +19,7 @@ mutable struct auto
     h::Float64
 
     #memoria de las velocidades en los nodos
+    speed_memories::Array{Dict{Int64, Float64},1}
     speed_memory::Dict{Int64,Float64}
 
     #camino A*
@@ -37,6 +38,7 @@ mutable struct auto
     
     function auto(o::Int64, d::Int64, ts::Float64, h::Float64,Red::network)
         speed_memory = Dict{Int64, Float64}()
+        speed_memories = [Dict{Int64, Float64}() for i in 1:7]
         Astarpath=LightGraphs.a_star(Red.digraph,
             o, d,Red.city_matrix[:,:,1],n -> TimeEuclideanHeuristic(n,
                 d,Red.position_array))
@@ -47,21 +49,25 @@ mutable struct auto
         posicion=[Red.position_array[o]]
         is_out = false
         llego = 0.
-        new(o,d,ts,h,speed_memory,Astarpath,last_node,next_node,avance,vel,posicion,is_out,llego)
+        new(o,d,ts,h,speed_memories,speed_memory,Astarpath,last_node,next_node,avance,vel,posicion,is_out,llego)
     end
 end
 
-function generate_auto(m,t,red, h_distribution)
-    o = rand(1:m)
-    d = collect(1:m)
-    splice!(d,o)
-    d = d[rand(1:end)]
+function generate_auto(m,tamano_red,t,red, h_distribution)
+    o = 1
+    d = 1
+    while LightGraphs.dijkstra_shortest_paths(red.digraph,o).dists[d] < min(10, tamano_red)
+        o = rand(1:m)
+        d = collect(1:m)
+        splice!(d,o)
+        d = d[rand(1:end)]
+    end
     h = rand(h_distribution) #h es la porporción que corresponde a la memoria
     return auto(o,d,t,h,red)
 end
 
-function generate_autos(m, red, n_cars, ti, tf, h_dist)
+function generate_autos(m, tamano_red, red, n_cars, ti, tf, h_dist)
     step = (tf-ti)/(n_cars-1)
-    autos = [generate_auto(m,t,red, h_dist) for t in collect(ti:step:tf)]
+    autos = [generate_auto(m,tamano_red, t,red, h_dist) for t in collect(ti:step:tf)]
     return autos
 end
