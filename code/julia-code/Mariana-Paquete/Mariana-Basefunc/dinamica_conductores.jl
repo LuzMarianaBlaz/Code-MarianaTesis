@@ -323,7 +323,10 @@ This function restarts the newtork and the cars array to start a new simulation
 """                         
 function restart(Autos, Red)
     n = 0
+    i = 0
+    indexes=[]
     for auto in Autos
+        i +=1
         auto.avance = 0.
         auto.vel = 0.
         auto.is_out = false
@@ -333,6 +336,7 @@ function restart(Autos, Red)
         auto.astarpath = update_Astarpath(auto, Red)
         if old_astar != auto.astarpath
             n += 1
+            push!(indexes,i)
         end
         auto.next_node = dst(auto.astarpath[1])
         auto.posicion = [Red.position_array[auto.o]]
@@ -342,10 +346,15 @@ function restart(Autos, Red)
     Red.city_matrix[:,:,3] = zeros(m,m)
     Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1],
         Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);   
-    return n 
+    return n, indexes
 end
 
 function get_avg_vel(autos)
     avg_vels = [mean(values(auto.speed_memory)) for auto in autos]
     return minimum(avg_vels), mean(avg_vels)
+end
+
+function get_avg_times(autos)
+    times = [auto.llego-auto.ts for auto in autos]
+    return times
 end
