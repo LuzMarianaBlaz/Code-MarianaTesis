@@ -196,7 +196,7 @@ the estimation is made using the formula ``(1-h)*estimated time + h*remembered t
 """
 function MemoryHeuristic(i::Int64, j::Int64,
     position_array::Array{Array{Float64,1},1},h::Float64,
-    speed_memory::Dict{Int,Float64}=Dict{Int,Float64})::Float64
+    speed_memory=Dict{Int,Float64})::Float64
     distance = norm(position_array[i]-position_array[j])
     estimation_part = distance/max_speed(i,j,position_array)
     memory_part = distance/speed(i,j,position_array,speed_memory)
