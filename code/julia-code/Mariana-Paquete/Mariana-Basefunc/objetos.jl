@@ -56,11 +56,9 @@ end
 function generate_auto(m,tamano_red,t,red, h_distribution)
     o = 1
     d = 1
-    while LightGraphs.dijkstra_shortest_paths(red.digraph,o).dists[d] < min(10, tamano_red)
+    while LightGraphs.dijkstra_shortest_paths(red.digraph,o).dists[d] > min(10, tamano_red)
         o = rand(1:m)
-        d = collect(1:m)
-        splice!(d,o)
-        d = d[rand(1:end)]
+        d = rand(1:m)
     end
     h = rand(h_distribution) #h es la porporción que corresponde a la memoria
     return auto(o,d,t,h,red)
