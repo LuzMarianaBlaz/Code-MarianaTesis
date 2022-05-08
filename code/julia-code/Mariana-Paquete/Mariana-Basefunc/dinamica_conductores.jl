@@ -103,38 +103,31 @@ function sig_ts(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
     p=sortperm([auto.ts for auto in Estacionados])
     Estacionados = Estacionados[p]
 
-    # Si aun hay estacionados
-    if length(Estacionados) > 0
-        u = Estacionados[1].o
-        v = dst(Estacionados[1].astarpath[1])
+    i = 0
+    for auto in Estacionados
+        i += 1
+        u = Estacionados[i].o
+        v = dst(Estacionados[i].astarpath[1])
         #si la calle a la que debe salir tiene espacio:
-        if Red.city_matrix[u,v,3] + 1 < Red.city_matrix[u,v,2]
+        if Red.city_matrix[u,v,3] + 1 <= Red.city_matrix[u,v,2]
             # Regresamos el siguiente auto que puede salir y su tiempo de salida 
-            sts = Estacionados[1].ts-tiempo_universal
-            car = Estacionados[1]
-        else 
-            #Si no hay espacio, le agregamos 10 a todos los tiempos de salida de autos que salen por esa calle
+            sts = Estacionados[i].ts-tiempo_universal
+            car = Estacionados[i]
+            return sts, car
+        else
+            #= Si no hay espacio, le agregamos un numero aleatorio de segundos
+             a todos los tiempos de salida de autos que salen por esa calle =#
             for auto in Estacionados 
                 if auto.o == u & v == dst(auto.astarpath[1])
-                    auto.ts = auto.ts + 10.
+                    auto.ts = auto.ts + 10.*rand()
                 end
             end
-            # reordenamos los autos con los nuevos tiempos        
-            p=sortperm([auto.ts for auto in Estacionados])
-            Estacionados = Estacionados[p]
-            # si el reordenamiento queda diferente al arreglo original, volvemos a intentar correr la función 
-            if Estacionados != Estacionados[p]
-                sts, car = sig_ts(tiempo_universal, Red, Estacionados)
-            else
-                # si el reordenamiento queda diferente quiere decir que no hay espacio para salir
-                sts=Inf
-                car = nothing 
-            end
         end
-    else # si ya salieron todos los autos
-        sts = Inf
-        car = nothing
     end
+
+    sts = Inf
+    car = nothing
+
     return sts, car
 end
 
@@ -171,7 +164,7 @@ function sig_ca(Red::network, Autos::Array{auto,1})
         else
             # si aún no va a alcanzar su destino tiene que comprobar que en la siguiente calle haya espacio
             w = dst(auto.astarpath[index][1])
-            if Red.city_matrix[v,w,3] + 1 < Red.city_matrix[v,w,2]
+            if Red.city_matrix[v,w,3] + 1 <= Red.city_matrix[v,w,2]
                 # Si hay espacio calcula en cuánto tiempo cambiaría de arista, si es menor que sca, lo sustituye
                 tiempo = Red.city_matrix[u,v,4]
                 longitud = norm(Red.position_array[u]-Red.position_array[v])
@@ -253,7 +246,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
 
     # Mientras haya autos que no hayan llegado a su destino
     while (length([auto for auto in Autos if auto.llego!=0.]) < length(Autos))
-        # Se calculan el siguiente cambio de arista y el siguiente tiempo
+        # Se calculan el siguiente cambio de arista y el siguiente tiempo de salida
         sts, car_sale = sig_ts(tiempo_universal, Red, Autos)
         sca, car_cambia = sig_ca(Red, Autos)
         siguiente_tiempo = min(sts, sca)
@@ -270,7 +263,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             # se aumenta en 1 al numero de autos de la arista de la que salió
             Red.city_matrix[u,v,3] += 1.
         # si lo que sigue es un cambio de arista
-        else
+        elseif sca <= sts
             u = car_cambia.last_node
             car_cambia.speed_memory[u] = car_cambia.vel
             index1 = findall(x->src(x)==u, car_cambia.astarpath)    
@@ -282,7 +275,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             # si con esta acción el auto llega a destino se registra el tiempo en el que llegó
             if v == car_cambia.d
                 car_cambia.llego = tiempo_universal
-                save_position(car_cambia,Red,Red.position_array[car_cambia.d])
+                #save_position(car_cambia,Red,Red.position_array[car_cambia.d])
             # si no ha llegado y cambia de arista se amenta el uno el número de autos a la arista a la que va
             else
                 index2 = findall(x->src(x)==v, car_cambia.astarpath)    
@@ -290,6 +283,10 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                 car_cambia.next_node = w
                 Red.city_matrix[v,w,3] += 1.      
             end
+        else
+            printf("Red atascada")
+            # Agregar el nu´mero de autos affuera.
+            break
         end
         
         # para todos los autos que están en ruta
@@ -303,12 +300,12 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             
             u = auto.last_node
             v = auto.next_node
-            save_position(auto,Red,
+            #save_position(auto,Red,
             Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u])/norm(Red.position_array[v]-Red.position_array[u]))
         end
 
         for auto in [auto for auto in Autos if !(auto.is_out)]
-            save_position(auto,Red,[NaN,NaN])
+            #save_position(auto,Red,[NaN,NaN])
         end
         dist_matrix = distance_matrix(Red.position_array)
         
