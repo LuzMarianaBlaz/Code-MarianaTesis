@@ -224,7 +224,7 @@ function create_square_network(side_number::Integer; both_ways=true)
     
     m = nv(SquareNet);
     city_matrix = zeros(m,m,4);
-    f = x -> [speed(i,j,x) for i in 1:length(x),j in 1:length(x)];
+    f = x -> [max_speed(i,j,x) for i in 1:length(x),j in 1:length(x)];
     city_matrix[:,:,1] = dist_matrix./f(position_array);
     city_matrix[:,:,2] = dist_matrix./5;
     city_matrix[:,:,4] = BPR.(city_matrix[:,:,1], city_matrix[:,:,3],city_matrix[:,:,2]);
