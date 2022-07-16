@@ -119,7 +119,7 @@ function sig_ts(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
              a todos los tiempos de salida de autos que salen por esa calle =#
             for auto in Estacionados 
                 if auto.o == u & v == dst(auto.astarpath[1])
-                    auto.ts = auto.ts + 10.*rand()
+                    auto.ts = auto.ts + 10.0 * rand()
                 end
             end
         end
@@ -293,20 +293,28 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
         for auto in [auto for auto in Autos if (auto.is_out && auto.llego==0.)]
             # el avance de los autos es su velocidad por el pedazo de tiempo que avanza la simulación
             auto.avance += auto.vel * siguiente_tiempo
-            # excepto para el auto que cambió, cuyo avance es cero
-            if sca<sts && auto==car_cambia
-                auto.avance = 0.
+            # excepto para el auto que cambió, o para autos que no pueden cambiar de arista
+            # a ellos les pondremos otros avances.
+
+            if (sca<=sts && auto==car_cambia)
+                # al auto que cambió le ponemos 0
+                auto.avance = 0.0
+            end
+
+            if (auto.avance-longitud >= 0.0)
+                # a los autos que no pueden avanzar les ponemos el mismo avance que tenían.
+                auto.avance -= auto.vel * siguiente_tiempo
             end
             
             u = auto.last_node
             v = auto.next_node
             #save_position(auto,Red,
-            Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u])/norm(Red.position_array[v]-Red.position_array[u]))
+            #Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u])/norm(Red.position_array[v]-Red.position_array[u]))
         end
 
-        for auto in [auto for auto in Autos if !(auto.is_out)]
+        #for auto in [auto for auto in Autos if !(auto.is_out)]
             #save_position(auto,Red,[NaN,NaN])
-        end
+        #end
         dist_matrix = distance_matrix(Red.position_array)
         
         # por último se actualizan los tiempos de recorrido en la red
