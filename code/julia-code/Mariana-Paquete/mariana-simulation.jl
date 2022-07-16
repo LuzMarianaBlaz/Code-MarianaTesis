@@ -16,7 +16,7 @@ h_distribution = Normal(center_h_dist, sd_h_dist);
 n_cars = NCARS;
 ti = 0.0;
 tf = 150;
-max_n_dias = 200;
+n_dias = 50;
 path_csv = "OUTFILEMARIANA";
 
 # Generacion de la red
@@ -33,7 +33,7 @@ autos = generate_autos(m,tamano_red, red_cuadrada,n_cars,ti,tf,h_distribution);
 day_simulacion = 0;
 n_simulacion = 200;
 
-while day_simulacion < 51
+while day_simulacion < n_dias+1
     print("día $(day_simulacion) \n")
     times, vels = simulacion!(0., red_cuadrada, autos);
     vels_summ = vels_summary(autos)
