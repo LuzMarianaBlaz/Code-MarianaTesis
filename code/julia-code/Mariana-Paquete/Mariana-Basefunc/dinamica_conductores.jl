@@ -275,7 +275,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             # si con esta acción el auto llega a destino se registra el tiempo en el que llegó
             if v == car_cambia.d
                 car_cambia.llego = tiempo_universal
-                #save_position(car_cambia,Red,Red.position_array[car_cambia.d])
+                save_position(car_cambia,Red,Red.position_array[car_cambia.d])
             # si no ha llegado y cambia de arista se amenta el uno el número de autos a la arista a la que va
             else
                 index2 = findall(x->src(x)==v, car_cambia.astarpath)    
@@ -301,21 +301,21 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                 auto.avance = 0.0
             end
 
+            longitud = norm(Red.position_array[auto.last_node]-Red.position_array[auto.next_node])
             if (auto.avance-longitud >= 0.0)
                 # a los autos que no pueden avanzar les ponemos a que avancen hasta la esquina pero no más alla
-                longitud = norm(Red.position_array[auto.last_node]-Red.position_array[auto.next_node])
                 auto.avance == (longitud)*0.99
             end
             
             u = auto.last_node
             v = auto.next_node
-            #save_position(auto,Red,
-            #Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u])/norm(Red.position_array[v]-Red.position_array[u]))
+            save_position(auto,Red,
+            Red.position_array[u]+auto.avance*(Red.position_array[v]-Red.position_array[u])/norm(Red.position_array[v]-Red.position_array[u]))
         end
 
-        #for auto in [auto for auto in Autos if !(auto.is_out)]
-            #save_position(auto,Red,[NaN,NaN])
-        #end
+        for auto in [auto for auto in Autos if !(auto.is_out)]
+            save_position(auto,Red,[NaN,NaN])
+        end
         dist_matrix = distance_matrix(Red.position_array)
         
         # por último se actualizan los tiempos de recorrido en la red
