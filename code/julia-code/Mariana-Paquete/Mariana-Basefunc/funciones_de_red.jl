@@ -113,12 +113,17 @@ function paste_diagonal(nw, position_array, new_positions)
         
         add_vertex!(nw)
         vertex_num = nv(nw)
-        add_edge!(nw,vertices[1],vertex_num)
-        add_edge!(nw,vertex_num,vertices[2])
-        add_edge!(nw,vertices[2],vertex_num)
-        add_edge!(nw,vertex_num,vertices[1])
-        rem_edge!(nw, vertices[1], vertices[2])
-        rem_edge!(nw, vertices[2], vertices[1])
+
+        if has_edge(nw,vertices[1], vertices[2])
+            add_edge!(nw,vertices[1],vertex_num)
+            add_edge!(nw,vertex_num,vertices[2])
+            rem_edge!(nw, vertices[1], vertices[2])
+        end
+        if has_edge(nw,vertices[2], vertices[1])
+            add_edge!(nw,vertices[2],vertex_num)
+            add_edge!(nw,vertex_num,vertices[1])
+            rem_edge!(nw, vertices[2], vertices[1])
+        end
         
         if vertex_num > original_number+1
             add_edge!(nw,vertex_num-1,vertex_num)
