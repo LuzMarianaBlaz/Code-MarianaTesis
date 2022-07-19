@@ -304,7 +304,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             if (auto.avance-longitud >= 0.0)
                 # a los autos que no pueden avanzar les ponemos a que avancen hasta la esquina pero no más alla
                 longitud = norm(Red.position_array[auto.last_node]-Red.position_array[auto.next_node])
-                auto.avance == longitud 
+                auto.avance == (longitud)*0.99
             end
             
             u = auto.last_node
