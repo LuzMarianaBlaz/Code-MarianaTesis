@@ -263,7 +263,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             # se aumenta en 1 al numero de autos de la arista de la que salió
             Red.city_matrix[u,v,3] += 1.
         # si lo que sigue es un cambio de arista
-        elseif sca <= sts
+        elseif sca <= sts && (sca != Inf)
             u = car_cambia.last_node
             car_cambia.speed_memory[u] = car_cambia.vel
             index1 = findall(x->src(x)==u, car_cambia.astarpath)    
@@ -284,7 +284,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
                 Red.city_matrix[v,w,3] += 1.      
             end
         else
-            printf("Red atascada")
+            print("Red atascada","\n")
             # Agregar el nu´mero de autos affuera.
             break
         end
