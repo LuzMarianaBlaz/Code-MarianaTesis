@@ -56,7 +56,7 @@ end
 function generate_auto(m,tamano_red,t,red, h_distribution)
     o = 1
     d = 1
-    while LightGraphs.dijkstra_shortest_paths(red.digraph,o).dists[d] > min(10, tamano_red)
+    while LightGraphs.dijkstra_shortest_paths(red.digraph,o).dists[d] < min(10, tamano_red)
         o = rand(1:m)
         d = rand(1:m)
     end
