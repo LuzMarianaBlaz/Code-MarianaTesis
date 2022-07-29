@@ -285,7 +285,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             end
         else
             print("Red atascada","\n")
-            # Agregar el nu´mero de autos affuera.
+            print("con ", sum(Red.city_matrix[:,:,3]), " autos en ruta","\n")
             break
         end
         
