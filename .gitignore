@@ -3,3 +3,4 @@ code/python_code/__pycache__
 .DS_Store
 code/julia-code/*.ipynb
 code/julia-code/gifs
+code/julia-code/simulaciones-cluster
