@@ -102,24 +102,27 @@ function sig_ts(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
     Estacionados = [auto for auto in Autos if !(auto.is_out)]
     p=sortperm([auto.ts for auto in Estacionados])
     Estacionados = Estacionados[p]
+    to_skip = []
 
-    i = 0
-    for auto in Estacionados
-        i += 1
-        u = Estacionados[i].o
-        v = dst(Estacionados[i].astarpath[1])
+    for i in 1:length(Estacionados)
+        if (i ∉ to_skip)
+            u = Estacionados[i].o
+            v = dst(Estacionados[i].astarpath[1])
+
         #si la calle a la que debe salir tiene espacio:
-        if Red.city_matrix[u,v,3] + 1 <= Red.city_matrix[u,v,2]
-            # Regresamos el siguiente auto que puede salir y su tiempo de salida 
-            sts = Estacionados[i].ts-tiempo_universal
-            car = Estacionados[i]
-            return sts, car
-        else
-            #= Si no hay espacio, le agregamos un numero aleatorio de segundos
-             a todos los tiempos de salida de autos que salen por esa calle =#
-            for auto in Estacionados 
-                if auto.o == u & v == dst(auto.astarpath[1])
-                    auto.ts = auto.ts + 10.0 * rand()
+            if Red.city_matrix[u,v,3] + 1 <= Red.city_matrix[u,v,2]
+                # Regresamos el siguiente auto que puede salir y su tiempo de salida 
+                sts = Estacionados[i].ts-tiempo_universal
+                car = Estacionados[i]
+                return sts, car
+            else
+                for j in i:length(Estacionados)
+                    u_star = Estacionados[j].o
+                    v_star = dst(Estacionados[j].astarpath[1])
+                    if u_star==u && v_star==v
+                        Estacionados[j].ts = Estacionados[j].ts + 0.5 + 5.0 * rand()
+                        push!(to_skip, j)
+                    end
                 end
             end
         end
@@ -177,7 +180,7 @@ function sig_ca(Red::network, Autos::Array{auto,1})
             end
         end
     end
-    return sca, car
+    return max(sca,0.0), car
 end 
 
 
@@ -255,7 +258,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
         push!(time_array, tiempo_universal)
 
         # si lo que sigue es una salida de destino
-        if sts < sca
+        if sts <= sca && (sts != Inf)
             # se cambia el estado del auto que sale a is_out = true
             car_sale.is_out = true
             u = car_sale.o
@@ -263,7 +266,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             # se aumenta en 1 al numero de autos de la arista de la que salió
             Red.city_matrix[u,v,3] += 1.
         # si lo que sigue es un cambio de arista
-        elseif sca <= sts && (sca != Inf)
+        elseif sca < sts 
             u = car_cambia.last_node
             car_cambia.speed_memory[u] = car_cambia.vel
             index1 = findall(x->src(x)==u, car_cambia.astarpath)    
@@ -296,7 +299,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             # excepto para el auto que cambió, o para autos que no pueden cambiar de arista
             # a ellos les pondremos otros avances.
 
-            if (sca<=sts && auto==car_cambia)
+            if (sca<sts && auto==car_cambia)
                 # al auto que cambió le ponemos 0
                 auto.avance = 0.0
             end
@@ -304,7 +307,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             longitud = norm(Red.position_array[auto.last_node]-Red.position_array[auto.next_node])
             if (auto.avance-longitud >= 0.0)
                 # a los autos que no pueden avanzar les ponemos a que avancen hasta la esquina pero no más alla
-                auto.avance == (longitud)*0.99
+                auto.avance == (longitud)*0.90
             end
             
             u = auto.last_node
