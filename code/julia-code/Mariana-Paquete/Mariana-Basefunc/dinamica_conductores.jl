@@ -112,7 +112,7 @@ function sig_ts(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
                 car = Estacionados[i]
                 return sts, car
             else
-                Estacionados[i].ts += 0.5 + 0.5 * rand()
+                Estacionados[i].ts += 0.05 + (0.05 * rand())
             end
     end
 
