@@ -102,13 +102,9 @@ function sig_ts(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
     Estacionados = [auto for auto in Autos if !(auto.is_out)]
     p=sortperm([auto.ts for auto in Estacionados])
     Estacionados = Estacionados[p]
-    to_skip = []
-
     for i in 1:length(Estacionados)
-        if (i ∉ to_skip)
             u = Estacionados[i].o
             v = dst(Estacionados[i].astarpath[1])
-
         #si la calle a la que debe salir tiene espacio:
             if Red.city_matrix[u,v,3] + 1 <= Red.city_matrix[u,v,2]
                 # Regresamos el siguiente auto que puede salir y su tiempo de salida 
@@ -116,21 +112,12 @@ function sig_ts(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
                 car = Estacionados[i]
                 return sts, car
             else
-                for j in i:length(Estacionados)
-                    u_star = Estacionados[j].o
-                    v_star = dst(Estacionados[j].astarpath[1])
-                    if u_star==u && v_star==v
-                        Estacionados[j].ts = Estacionados[j].ts + 0.5 + 5.0 * rand()
-                        push!(to_skip, j)
-                    end
-                end
+                Estacionados[i].ts += 0.5 + 0.5 * rand()
             end
-        end
     end
 
     sts = Inf
     car = nothing
-
     return sts, car
 end
 
@@ -253,20 +240,26 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
         sts, car_sale = sig_ts(tiempo_universal, Red, Autos)
         sca, car_cambia = sig_ca(Red, Autos)
         siguiente_tiempo = min(sts, sca)
-        # el tiempo universal se adelanta por siguiente_tiempo
-        tiempo_universal += siguiente_tiempo
-        push!(time_array, tiempo_universal)
 
         # si lo que sigue es una salida de destino
-        if sts <= sca && (sts != Inf)
+        if sts < sca 
+            # el tiempo universal se adelanta por siguiente_tiempo
+            tiempo_universal += siguiente_tiempo
+            push!(time_array, tiempo_universal)
+
             # se cambia el estado del auto que sale a is_out = true
             car_sale.is_out = true
             u = car_sale.o
             v = dst(car_sale.astarpath[1])
             # se aumenta en 1 al numero de autos de la arista de la que salió
             Red.city_matrix[u,v,3] += 1.
+
         # si lo que sigue es un cambio de arista
-        elseif sca < sts 
+        elseif sca <= sts && (sca != Inf)
+            # el tiempo universal se adelanta por siguiente_tiempo
+            tiempo_universal += siguiente_tiempo
+            push!(time_array, tiempo_universal)
+
             u = car_cambia.last_node
             car_cambia.speed_memory[u] = car_cambia.vel
             index1 = findall(x->src(x)==u, car_cambia.astarpath)    
@@ -299,7 +292,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             # excepto para el auto que cambió, o para autos que no pueden cambiar de arista
             # a ellos les pondremos otros avances.
 
-            if (sca<sts && auto==car_cambia)
+            if (sca<=sts && auto==car_cambia)
                 # al auto que cambió le ponemos 0
                 auto.avance = 0.0
             end
@@ -307,7 +300,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
             longitud = norm(Red.position_array[auto.last_node]-Red.position_array[auto.next_node])
             if (auto.avance-longitud >= 0.0)
                 # a los autos que no pueden avanzar les ponemos a que avancen hasta la esquina pero no más alla
-                auto.avance == (longitud)*0.90
+                auto.avance == (longitud)*(0.9 + 0.9*rand())
             end
             
             u = auto.last_node
@@ -325,7 +318,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
         Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1], Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);
         vel_matrix += dist_matrix./Red.city_matrix[:,:,4];
     end
-    
+    #print("\n tiempo final"*string(tiempo_universal))
     return time_array, vel_matrix/(length(time_array))
 end
         
@@ -333,11 +326,12 @@ end
     restart(Autos, Red)
 This function restarts the newtork and the cars array to start a new simulation
 """                         
-function restart(Autos, Red)
+function restart(Autos, Red, tiempos_de_salida_snapshot)
     i = 0
     indexes=[]
     for auto in Autos
         i +=1
+        auto.ts = tiempos_de_salida_snapshot[i]
         auto.avance = 0.
         auto.vel = 0.
         auto.is_out = false
