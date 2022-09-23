@@ -225,7 +225,7 @@ You can choose if the streets are both-ways or not using the *both_ways* paramet
 """
 function create_square_network(side_number::Integer; both_ways=true)
     SquareNet, position_array, dist_matrix = SquareDiGraph(side_number, doble_sentido=both_ways);
-    SquareNet, position_array, dist_matrix = make_slow_corners(SquareNet, position_array, dist_matrix);
+    SquareNet, position_array, dist_matrix = make_slow_corners(SquareNet, position_array);
     
     m = nv(SquareNet);
     city_matrix = zeros(m,m,4);
