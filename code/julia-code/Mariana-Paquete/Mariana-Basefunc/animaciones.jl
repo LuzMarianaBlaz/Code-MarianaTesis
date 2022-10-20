@@ -60,11 +60,9 @@ function which_different(A,B)
     findall(x->x==1, A .!= B)
 end
 
-function plot_digraph(g, position_array; attribute_matrix = ones(nv(g),nv(g)), separated_edges = false)
+function plot_digraph(g, position_array; attribute_matrix = ones(nv(g),nv(g)),
+                      separated_edges = false, c1 = colorant"red", c2 = colorant"green")
     fig = plot()
-    
-    c1 = colorant"red"
-    c2 = colorant"green"
     
     if attribute_matrix != ones(nv(g),nv(g))
         new_matrix1 = zeros(nv(g),nv(g))
