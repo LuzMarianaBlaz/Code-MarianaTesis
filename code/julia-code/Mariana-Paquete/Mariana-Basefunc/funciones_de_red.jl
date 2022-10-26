@@ -238,11 +238,27 @@ function create_square_network(side_number::Integer; both_ways=true)
 end
 
 
-function create_square_network_with_diagonal(side_number::Integer, diagonal_start, diagonal_slope; both_ways=true)
+function make_churubusco(side_number::Integer, diagonal_start, diagonal_slope; both_ways=true)
     SquareNet, position_array, dist_matrix = SquareDiGraph(side_number, doble_sentido=both_ways);
-    nw, posarr, distm, new_positions = add_diagonal!(SquareNet, position_array, diag_start, diagonal_slope, side_number,40.);
+    nw, posarr, distm, new_positions = add_diagonal!(SquareNet, position_array, diagonal_start, diagonal_slope, side_number, 40.);
     SquareNet, position_array, dist_matrix = make_slow_corners(nw, posarr, new_positions);
     
+    m = nv(SquareNet);
+    city_matrix = zeros(m,m,4);
+    f = x -> [max_speed(i,j,x) for i in 1:length(x),j in 1:length(x)];
+    city_matrix[:,:,1] = dist_matrix./f(position_array);
+    city_matrix[:,:,2] = dist_matrix./5;
+    city_matrix[:,:,4] = BPR.(city_matrix[:,:,1], city_matrix[:,:,3],city_matrix[:,:,2]);
+    red_cuadrada=network(SquareNet,position_array,city_matrix);
+    return red_cuadrada
+end
+
+
+function make_div_del_norte(side_number::Integer, diagonal_start, diagonal_slope; both_ways=true)
+    SquareNet, position_array, dist_matrix = SquareDiGraph(side_number, doble_sentido=both_ways);
+    nw, posarr, distm, new_positions = add_diagonal!(SquareNet, position_array, diagonal_start, diagonal_slope, side_number, 40.);
+    SquareNet, position_array, dist_matrix = make_slow_corners(nw, posarr);
+        
     m = nv(SquareNet);
     city_matrix = zeros(m,m,4);
     f = x -> [max_speed(i,j,x) for i in 1:length(x),j in 1:length(x)];
