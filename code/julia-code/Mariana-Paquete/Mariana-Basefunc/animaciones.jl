@@ -60,72 +60,18 @@ function which_different(A,B)
     findall(x->x==1, A .!= B)
 end
 
-function plot_digraph(g, position_array; attribute_matrix = ones(nv(g),nv(g)),
-                      separated_edges = false, c1 = colorant"red", c2 = colorant"green",
-                      min_value = 0., max_value = 100.0)
-    fig = plot()
-    
-    if attribute_matrix != ones(nv(g),nv(g))
-        num_colors = floor(Int(round(max_value - min_value+1, digits=2)*10^2))
-        print(num_colors)
-        cols = range(c1,stop=c2,length=num_colors)
-    else
-        cols = ["black" for i in 1:ne(g)]
-    end
-    
-    
-    for e in collect(edges(g))
-        u = src(e)
-        v = dst(e)
-
-        pos_u = deepcopy(position_array[u])
-        pos_v = deepcopy(position_array[v])
-        
-        
-        if separated_edges
-        
-            if which_different(pos_u,pos_v)[1] == 1
-                if pos_u[1] < pos_v[1]
-                    pos_u[2] -= 2. 
-                    pos_v[2] -= 2.
-                else
-                    pos_u[2] += 2. 
-                    pos_v[2] += 2.
-                end
-            end
-
-            if which_different(pos_u,pos_v)[1] == 2
-                if pos_u[2] < pos_v[2]
-                    pos_u[1] -= 2. 
-                    pos_v[1] -= 2.
-                else
-                    pos_u[1] += 2. 
-                    pos_v[1] += 2.
-                end
-            end
-        end
-        
-        order = floor(Int,(attribute_matrix[u,v]-min_value+1)*100)
-        edge_color = cols[order] 
-    
-        plot!([pos_u[1],pos_v[1]],[pos_u[2],pos_v[2]], 
-            color=edge_color,
-            linewidth=2.,label="", aspect_ratio=1)
-    end
-    return(fig, cols)
-end
 
 function plot_digraph(g, position_array; attribute_matrix = ones(nv(g),nv(g)),
     separated_edges = false, c1 = colorant"red", c2 = colorant"green",
     min_value = 0., max_value = 100.0)
     
     fig = plot()
-    
+
+    num_colors = floor(Int,(round(max_value, digits=2)*10^2))
     if attribute_matrix != ones(nv(g),nv(g))
-        num_colors = floor(Int(round(max_value - min_value+1, digits=2)*10^2))
         cols = range(c1,stop=c2,length=num_colors)
     else
-        cols = ["black" for i in 1:ne(g)]
+        cols = ["black" for i in 1:num_colors]
     end
 
     for e in collect(edges(g))
@@ -157,7 +103,10 @@ function plot_digraph(g, position_array; attribute_matrix = ones(nv(g),nv(g)),
             end
         end
 
-        order = floor(Int,(attribute_matrix[u,v]-min_value+1)*100)
+        m = (max_value*100.0-1.0)/(max_value-min_value)
+        b = 1.0 - min_value*(max_value*100.0-1.0)/(max_value-min_value)
+        order = floor(Int,(m*attribute_matrix[u,v]+b))
+        print(order," ")
         edge_color = cols[order] 
 
         plot!([pos_u[1],pos_v[1]],[pos_u[2],pos_v[2]],
