@@ -282,6 +282,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
         else
             print("Red atascada","\n")
             print("con ", sum(Red.city_matrix[:,:,3]), " autos en ruta","\n")
+            return time_array, vel_matrix/(length(time_array)), Red.city_matrix[:,:,3]
             break
         end
         
@@ -319,7 +320,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
         vel_matrix += dist_matrix./Red.city_matrix[:,:,4];
     end
     #print("\n tiempo final"*string(tiempo_universal))
-    return time_array, vel_matrix/(length(time_array))
+    return time_array, vel_matrix/(length(time_array)), Red.city_matrix[:,:,3]
 end
         
 """
