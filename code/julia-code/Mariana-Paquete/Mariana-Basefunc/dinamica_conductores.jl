@@ -231,6 +231,7 @@ the simulation goes in discrete steps of time, each one representing an action. 
 """
 function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,1})
     time_array = []
+    autos_atorados = []
     m = size(Red.city_matrix,1)
     vel_matrix = zeros(m,m)
 
@@ -282,10 +283,12 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
         else
             print("Red atascada","\n")
             print("con ", sum(Red.city_matrix[:,:,3]), " autos en ruta","\n")
-            return time_array, vel_matrix/(length(time_array)), Red.city_matrix[:,:,3]
+            push!(autos_atorados, [sum(Red.city_matrix[:,:,3]), 1.0])
+            return time_array, vel_matrix/(length(time_array)), Red.city_matrix[:,:,3], autos_atorados
             break
         end
         
+        push!(autos_atorados, [sum(Red.city_matrix[:,:,3]), 0.0])
         # para todos los autos que están en ruta
         for auto in [auto for auto in Autos if (auto.is_out && auto.llego==0.)]
             # el avance de los autos es su velocidad por el pedazo de tiempo que avanza la simulación
@@ -320,7 +323,7 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
         vel_matrix += dist_matrix./Red.city_matrix[:,:,4];
     end
     #print("\n tiempo final"*string(tiempo_universal))
-    return time_array, vel_matrix/(length(time_array)), Red.city_matrix[:,:,3]
+    return time_array, vel_matrix/(length(time_array)), Red.city_matrix[:,:,3], autos_atorados
 end
         
 """
