@@ -106,7 +106,6 @@ function plot_digraph(g, position_array; attribute_matrix = ones(nv(g),nv(g)),
         m = (max_value*100.0-1.0)/(max_value-min_value)
         b = 1.0 - min_value*(max_value*100.0-1.0)/(max_value-min_value)
         order = floor(Int,(m*attribute_matrix[u,v]+b))
-        print(order," ")
         edge_color = cols[order] 
 
         plot!([pos_u[1],pos_v[1]],[pos_u[2],pos_v[2]],
