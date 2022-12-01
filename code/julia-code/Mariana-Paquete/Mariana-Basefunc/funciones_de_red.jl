@@ -208,6 +208,28 @@ function MemoryHeuristic(i::Int64, j::Int64,
     return (1-h)*estimation_part + h*memory_part
 end
 
+
+"""
+    CollectiveMemoryHeuristic(i, j, position_array, h, )
+A function that estimates the time from vertex ``i`` to vertex ``j``
+if you were in a straight line path, calculated using the speed memory of a driver, as
+well as a collective memory component, the estimation is made using the formula
+``(1-h)*estimated time + h*remembered time``.
+"""
+function CollectiveMemoryHeuristic(i::Int64,
+                                   j::Int64,
+                                   position_array::Array{Array{Float64,1},1}
+                                   h::Float64,
+                                   speed_memory=Dict{Int,Float64},
+                                   collective_speed_memory=Dict{Int,Float64})::Float64
+
+    distance = norm(position_array[i]-position_array[j])
+    estimation_part = distance/max_speed(i,j,position_array)
+    own_memory_part = distance/speed(i,j,position_array,speed_memory)
+    collective_memory_part = distance/speed(i,j,position_array,collective_speed_memory)
+    return (1-h)*estimation_part + h*(0.8*own_memory_part+0.2*collective_memory_part)
+end
+
 """
     create_square_network(side_number, both_ways)
 generates a complete network object, that contains a LightGraphs digraph, a position array
