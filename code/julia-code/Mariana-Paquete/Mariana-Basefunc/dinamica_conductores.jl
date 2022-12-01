@@ -1,6 +1,7 @@
 include("objetos.jl")
 include("funciones_de_red.jl")
 
+## Speed functions
 """
     max_speed(u, position_array)
 Returns the maximum speed in a given vertex ``u```.
@@ -52,12 +53,21 @@ function speed(u::Int,v::Int,
 end
 
 
+## Functions to change the shape of memory dictionaries to matrices
 function modify_vels(Auto::auto, Red::network)
     m,k,l = size(Red.city_matrix)
     mean_speed_memory = mean_vel_from_memories(Auto.speed_memories)
     return([speed(i,j,Red.position_array, mean_speed_memory) for i in 1:m, j in 1:m])
 end
 
+function modify_collective_vels(collective_memory, Red::network)
+    m,k,l = size(Red.city_matrix)
+    mean_collective_speed_memory = mean_vel_from_memories(collective_memory)
+    return([speed(i,j,Red.position_array, mean_collective_speed_memory) for i in 1:m, j in 1:m])
+end
+
+
+## Funcitons to update A* path
 """
     update_Astarpath(auto, red)
 Updates the A* path for a driver (auto) in the network (red), taking into account
@@ -74,7 +84,27 @@ function update_Astarpath(Auto::auto, Red::network)
     Auto.h,mean_speed_memory)))
 end
 
+"""
+    update_Astarpath_collective(auto, collective_memory, red)
+Updates the A* path for a driver (auto) in the network (red), taking into account
+the new information the driver has stored in its `speed_memory`. 
+"""
+function update_Astarpath_collective(Auto::auto, collective_memory, Red::network)
+    own_memory_weight_matrix = distance_matrix(Red.position_array)./modify_vels(Auto, Red)
+    collective_memory_weight_matrix = distance_matrix(Red.position_array)./modify_collective_vels(collective_memory, Red)
+    estimated_weight_matrix = Red.city_matrix[:,:,1]
 
+    weight_matrix = (1-Auto.h)*estimated_weight_matrix + Auto.h*(0.8*memory_weight_matrix + 0.2*collective_memory_weight_matrix)
+    own_mean_speed_memory = mean_vel_from_memories(Auto.speed_memories)
+    collective_mean_speed_memory = mean_vel_from_memories(collective_memory)
+    
+    return (LightGraphs.a_star(Red.digraph,
+    Auto.o, Auto.d,weight_matrix, n -> CollectiveMemoryHeuristic(n, Auto.d, Red.position_array,
+    Auto.h,mean_speed_memory, collective_memory)))
+end
+
+
+## BPR function
 """
     BPR(tmin_ij, f_ij, p_ij, α, β)
 Returns the modified time in edge ``ij``, given the flux ``f_{ij}`` and capacity ``p_{ij}`` in
@@ -89,6 +119,7 @@ function BPR(tmin_ij::Float64, f_ij::Float64 ,p_ij::Float64, α::Float64 = 0.2, 
 end
 
 
+## Funciones de siguiente tiempo
 """
     sig_ts(tiempo_universal, red, autos)
 Calculates in how much time (with respect to `tiempo universal`) is the next departure for a car in 
@@ -171,6 +202,7 @@ function sig_ca(Red::network, Autos::Array{auto,1})
 end 
 
 
+## Utilidades para la animación
 """
     which_different(A,B)
 Find the indexes of the entries in arrays A, B that are different.
@@ -221,6 +253,7 @@ function save_position(car, Red, posicion)
 end
 
 
+## SIMULACIóN
 """
     simulacion!(tiempo_universal, red, autos)
 Given the network `red` and an array of drivers `autos`, generates the complete simulation until all drivers reach their destination,
@@ -325,7 +358,9 @@ function simulacion!(tiempo_universal::Float64, Red::network, Autos::Array{auto,
     #print("\n tiempo final"*string(tiempo_universal))
     return time_array, vel_matrix/(length(time_array)), Red.city_matrix[:,:,3], autos_atorados
 end
-        
+
+
+## Restart functions
 """
     restart(Autos, Red)
 This function restarts the newtork and the cars array to start a new simulation
@@ -361,6 +396,48 @@ function restart(Autos, Red, tiempos_de_salida_snapshot)
     return indexes
 end
 
+
+"""
+    restart_with_collective_mem(Autos, collective_memory, Red, tiempos_de_salida_snapshot)
+This function restarts the newtork and the cars array to start a new simulation
+"""                         
+function restart_with_collective_mem(Autos, collective_memory, Red, tiempos_de_salida_snapshot)
+    i = 0
+    indexes=[]
+
+    collective_memory[2:40] = collective_memory[1:39]
+    collective_memory[1] = mean_vel_from_autos(Autos)
+
+    for auto in Autos
+        i +=1
+        auto.ts = tiempos_de_salida_snapshot[i]
+        auto.avance = 0.
+        auto.vel = 0.
+        auto.is_out = false
+        auto.llego = 0.
+        auto.last_node = auto.o
+        mem = auto.days_of_memory
+        auto.speed_memories[2:mem] = auto.speed_memories[1:mem-1]
+        auto.speed_memories[1] = auto.speed_memory
+        old_astar = auto.astarpath
+        auto.astarpath = update_Astarpath_collective(auto, Red)
+        if old_astar != auto.astarpath
+            push!(indexes,i)
+        end
+        auto.next_node = dst(auto.astarpath[1])
+        auto.posicion = [Red.position_array[auto.o]]
+        
+        auto.speed_memory = Dict{Int64, Float64}()
+    end
+    m,k,l = size(Red.city_matrix)
+    Red.city_matrix[:,:,3] = zeros(m,m)
+    Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1],
+        Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);   
+    return indexes
+end
+
+
+## Summary functions
 function vels_summary(autos)
     return [mean(values(auto.speed_memory)) for auto in autos]
 end
@@ -369,6 +446,8 @@ function times_summary(autos)
     return [auto.llego-auto.ts for auto in autos]
 end
 
+
+## Functions to extract mean vel
 function mean_vel_from_memories(speed_memories)
     key_arr = []
     for dict in speed_memories
@@ -383,6 +462,30 @@ function mean_vel_from_memories(speed_memories)
         for dict in speed_memories
             count += 1
             vals[count]=get(dict, key, 0)
+        end
+        n = length(findall(x->x!=0,vals))
+        val = sum(vals)/n
+        new_dict[key]=val
+    end
+    return new_dict
+end
+
+function mean_vel_from_autos(autos)
+    key_arr = []
+    for auto in autos
+        memory_dict = auto.speed_memory
+        key_arr=union(key_arr,keys(memory_dict))
+    end
+    
+    nautos = length(autos)
+    new_dict = Dict() 
+    for key in key_arr
+        vals = zeros(nautos)
+        count = 0
+        for auto in autos
+            memory_dict = auto.speed_memory
+            count += 1
+            vals[count]=get(memory_dict, key, 0)
         end
         n = length(findall(x->x!=0,vals))
         val = sum(vals)/n
