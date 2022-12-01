@@ -19,6 +19,7 @@ mutable struct auto
     h::Float64
 
     #memoria de las velocidades en los nodos
+    days_of_memory::Int64
     speed_memories::Array{Dict{Int64, Float64},1}
     speed_memory::Dict{Int64,Float64}
 
@@ -36,9 +37,9 @@ mutable struct auto
     is_out::Bool
     llego::Float64
     
-    function auto(o::Int64, d::Int64, ts::Float64, h::Float64,Red::network)
+    function auto(o::Int64, d::Int64, ts::Float64, h::Float64, days_of_memory::Int64, Red::network)
         speed_memory = Dict{Int64, Float64}()
-        speed_memories = [Dict{Int64, Float64}() for i in 1:7]
+        speed_memories = [Dict{Int64, Float64}() for i in 1:days_of_memory]
         Astarpath=LightGraphs.a_star(Red.digraph,
             o, d,Red.city_matrix[:,:,1],n -> TimeEuclideanHeuristic(n,
                 d,Red.position_array))
@@ -49,7 +50,7 @@ mutable struct auto
         posicion=[Red.position_array[o]]
         is_out = false
         llego = 0.
-        new(o,d,ts,h,speed_memories,speed_memory,Astarpath,last_node,next_node,avance,vel,posicion,is_out,llego)
+        new(o,d,ts,h,days_of_memory,speed_memories,speed_memory,Astarpath,last_node,next_node,avance,vel,posicion,is_out,llego)
     end
 end
 
@@ -61,7 +62,8 @@ function generate_auto(m,tamano_red,t,red, h_distribution)
         d = rand(1:m)
     end
     h = rand(h_distribution) #h es la porporción que corresponde a la memoria
-    return auto(o,d,t,h,red)
+    days_of_memory = rand(5:10)
+    return auto(o,d,t,h,days_of_memory,red)
 end
 
 function generate_autos(m, tamano_red, red, n_cars, ti, tf, h_dist)

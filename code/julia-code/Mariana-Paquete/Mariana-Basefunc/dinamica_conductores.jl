@@ -341,7 +341,8 @@ function restart(Autos, Red, tiempos_de_salida_snapshot)
         auto.is_out = false
         auto.llego = 0.
         auto.last_node = auto.o
-        auto.speed_memories[2:7] = auto.speed_memories[1:6]
+        mem = auto.days_of_memory
+        auto.speed_memories[2:mem] = auto.speed_memories[1:mem-1]
         auto.speed_memories[1] = auto.speed_memory
         old_astar = auto.astarpath
         auto.astarpath = update_Astarpath(auto, Red)
@@ -373,10 +374,11 @@ function mean_vel_from_memories(speed_memories)
     for dict in speed_memories
         key_arr=union(key_arr,keys(dict))
     end
-
+    
+    mem = length(speed_memories)
     new_dict = Dict() 
     for key in key_arr
-        vals = zeros(7)
+        vals = zeros(mem)
         count = 0
         for dict in speed_memories
             count += 1
