@@ -94,13 +94,16 @@ function update_Astarpath_collective(Auto::auto, collective_memory, Red::network
     collective_memory_weight_matrix = distance_matrix(Red.position_array)./modify_collective_vels(collective_memory, Red)
     estimated_weight_matrix = Red.city_matrix[:,:,1]
 
-    weight_matrix = (1-Auto.h)*estimated_weight_matrix + Auto.h*(0.8*memory_weight_matrix + 0.2*collective_memory_weight_matrix)
+    weight_matrix = ((1-Auto.h)*estimated_weight_matrix +
+                     Auto.h*(0.8*own_memory_weight_matrix +
+                             0.2*collective_memory_weight_matrix))
+
     own_mean_speed_memory = mean_vel_from_memories(Auto.speed_memories)
     collective_mean_speed_memory = mean_vel_from_memories(collective_memory)
     
     return (LightGraphs.a_star(Red.digraph,
-    Auto.o, Auto.d,weight_matrix, n -> CollectiveMemoryHeuristic(n, Auto.d, Red.position_array,
-    Auto.h,mean_speed_memory, collective_memory)))
+    Auto.o, Auto.d, weight_matrix, n -> CollectiveMemoryHeuristic(n, Auto.d, Red.position_array,
+    Auto.h, own_mean_speed_memory, collective_mean_speed_memory)))
 end
 
 
@@ -420,7 +423,7 @@ function restart_with_collective_mem(Autos, collective_memory, Red, tiempos_de_s
         auto.speed_memories[2:mem] = auto.speed_memories[1:mem-1]
         auto.speed_memories[1] = auto.speed_memory
         old_astar = auto.astarpath
-        auto.astarpath = update_Astarpath_collective(auto, Red)
+        auto.astarpath = update_Astarpath_collective(auto,collective_memory, Red)
         if old_astar != auto.astarpath
             push!(indexes,i)
         end
