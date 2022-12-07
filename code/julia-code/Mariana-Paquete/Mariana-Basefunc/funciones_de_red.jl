@@ -218,7 +218,7 @@ well as a collective memory component, the estimation is made using the formula
 """
 function CollectiveMemoryHeuristic(i::Int64,
                                    j::Int64,
-                                   position_array::Array{Array{Float64,1},1}
+                                   position_array::Array{Array{Float64,1},1},
                                    h::Float64,
                                    speed_memory=Dict{Int,Float64},
                                    collective_speed_memory=Dict{Int,Float64})::Float64
