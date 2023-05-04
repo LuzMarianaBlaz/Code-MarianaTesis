@@ -6,7 +6,7 @@ HOMEM="/home/aramis/Mariana"
 cd $HOMEM
 mkdir -p Sim
 
-BASE="${HOMEM}/Sim"
+BASE="${HOMEM}/Sim/MemColectiva-VelHomogenea-Omniscientes/DivNte"
 cd $BASE
 
 declare -a arrR=${redsizes[*]}
@@ -40,7 +40,7 @@ do
             cd $BASE/redsize${tamano_red}/nautos${n_cars}/
             mkdir -p ${repetition}
 
-            sed 's/OUTFILEMARIANA/'Datos-RS${tamano_red}-N${n_cars}-R${repetition}.csv'/'  mariana-simulation-RS${tamano_red}-N${n_cars}.jl >> mariana-simulation-RS${tamano_red}-N${n_cars}-R${repetition}.jl 
+            sed 's/OUTFILEMARIANA/'Datos-RS${tamano_red}-N${n_cars}-R${repetition}.jld'/'  mariana-simulation-RS${tamano_red}-N${n_cars}.jl >> mariana-simulation-RS${tamano_red}-N${n_cars}-R${repetition}.jl 
             mv mariana-simulation-RS${tamano_red}-N${n_cars}-R${repetition}.jl ${repetition}/
 
             export BASEDIR=${BASE}/redsize${tamano_red}/nautos${n_cars}/${repetition}/
