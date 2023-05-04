@@ -229,6 +229,16 @@ function CollectiveMemoryHeuristic(i::Int64,
     collective_memory_part = distance/speed(i,j,position_array,collective_speed_memory)
     return (1-h)*estimation_part + h*(0.8*own_memory_part+0.2*collective_memory_part)
 end
+        
+function OmniscientMemoryHeuristic(i::Int64,
+                                   j::Int64,
+                                   position_array::Array{Array{Float64,1},1},
+                                   collective_speed_memory=Dict{Int,Float64})::Float64
+
+    distance = norm(position_array[i]-position_array[j])
+    collective_memory_part = distance/speed(i,j,position_array,collective_speed_memory)
+    return collective_memory_part
+end
 
 """
     create_square_network(side_number, both_ways)
