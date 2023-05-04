@@ -8,12 +8,13 @@ Returns the maximum speed in a given vertex ``u```.
 """
 function max_speed(u::Int,
     position_array::Array{Array{Float64,1},1}=[[0.,0.]])
-    x_array = [first(element) for element in position_array]
-    if position_array[u][1] < maximum(x_array)/2.
-        return 15. #m/s
-    else
-        return 8. #m/s
-    end
+    return 12.
+    #x_array = [first(element) for element in position_array]
+    #if position_array[u][1] < maximum(x_array)/2.
+        #return 15. #m/s
+    #else
+        #return 8. #m/s
+    #end
 end
 
 
@@ -106,6 +107,18 @@ function update_Astarpath_collective(Auto::auto, collective_memory, Red::network
     Auto.h, own_mean_speed_memory, collective_mean_speed_memory)))
 end
 
+
+## Conductores omniscientes
+function update_Astarpath_omniscient(Auto, collective_memory, Red::network)
+    collective_memory_weight_matrix = distance_matrix(Red.position_array)./modify_collective_vels(collective_memory, Red)
+
+    weight_matrix = collective_memory_weight_matrix
+    collective_mean_speed_memory = mean_vel_from_memories(collective_memory)
+    
+    return (LightGraphs.a_star(Red.digraph,
+    Auto.o, Auto.d, weight_matrix, n -> OmniscientMemoryHeuristic(n, Auto.d, Red.position_array,
+                collective_mean_speed_memory)))
+end
 
 ## BPR function
 """
@@ -438,18 +451,72 @@ function restart_with_collective_mem(Autos, collective_memory, Red, tiempos_de_s
         Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);   
     return indexes
 end
+                            
+                            
+"""
+    restart_with_omniscient_mem(Autos, collective_memory, Red, tiempos_de_salida_snapshot)
+This function restarts the newtork and the cars array to start a new simulation
+"""                         
+function restart_with_omniscient_mem(Autos, collective_memory, Red, tiempos_de_salida_snapshot)
+    i = 0
+    indexes=[]
+
+    collective_memory[2] = mean_vel_from_memories(collective_memory)
+    collective_memory[1] = mean_vel_from_autos(Autos)
+
+    for auto in Autos
+        i +=1
+        auto.ts = tiempos_de_salida_snapshot[i]
+        auto.avance = 0.
+        auto.vel = 0.
+        auto.is_out = false
+        auto.llego = 0.
+        auto.last_node = auto.o
+        mem = auto.days_of_memory
+        auto.speed_memories[2:mem] = auto.speed_memories[1:mem-1]
+        auto.speed_memories[1] = auto.speed_memory
+        old_astar = auto.astarpath
+        auto.astarpath = update_Astarpath_omniscient(auto, collective_memory, Red)
+        if old_astar != auto.astarpath
+            push!(indexes,i)
+        end
+        auto.next_node = dst(auto.astarpath[1])
+        auto.posicion = [Red.position_array[auto.o]]
+        
+        auto.speed_memory = Dict{Int64, Float64}()
+    end
+    m,k,l = size(Red.city_matrix)
+    Red.city_matrix[:,:,3] = zeros(m,m)
+    Red.city_matrix[:,:,4] = BPR.(Red.city_matrix[:,:,1],
+        Red.city_matrix[:,:,3],Red.city_matrix[:,:,2]);   
+    return indexes
+end
+                            
 
 
 ## Summary functions
-function vels_summary(autos)
-    return [mean(values(auto.speed_memory)) for auto in autos]
+function get_traversed_distance(auto, red)
+    distancia_total = 0
+    for edge in auto.astarpath
+        u = edge.src
+        v = edge.dst
+        longitud_arista = norm(red.position_array[u]-red.position_array[v])
+        distancia_total += longitud_arista
+    end
+    distancia_total
+end
+
+function distance_summary(autos, red)
+    return [get_traversed_distance(auto, red) for auto in autos]
 end
 
 function times_summary(autos)
-    return [auto.llego-auto.ts for auto in autos]
+    tmp_array = [auto.llego-auto.ts for auto in autos]
+    tmp_array[tmp_array.<=0] .= NaN                            
+    return tmp_array
 end
 
-
+                            
 ## Functions to extract mean vel
 function mean_vel_from_memories(speed_memories)
     key_arr = []
