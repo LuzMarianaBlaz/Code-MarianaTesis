@@ -1,3 +1,5 @@
+using Plots
+
 function complete!(autos, times)
     max_num = length(times)
     for auto in autos
@@ -65,7 +67,7 @@ function plot_digraph(g, position_array; attribute_matrix = ones(nv(g),nv(g)),
     separated_edges = false, c1 = colorant"red", c2 = colorant"green",
     min_value = 0., max_value = 100.0)
     
-    fig = plot()
+    fig = Plots.plot()
 
     num_colors = floor(Int,(round(max_value, digits=2)*10^2))
     if attribute_matrix != ones(nv(g),nv(g))
@@ -108,7 +110,7 @@ function plot_digraph(g, position_array; attribute_matrix = ones(nv(g),nv(g)),
         order = floor(Int,(m*attribute_matrix[u,v]+b))
         edge_color = cols[order] 
 
-        plot!([pos_u[1],pos_v[1]],[pos_u[2],pos_v[2]],
+        Plots.plot!([pos_u[1],pos_v[1]],[pos_u[2],pos_v[2]],
               color=edge_color,
               linewidth=2.,label="", aspect_ratio=1)
     end
