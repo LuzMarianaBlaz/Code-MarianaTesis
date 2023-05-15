@@ -43,6 +43,13 @@ nanmean(x,y) = mapslices(nanmean,x,dims=y)
     
 nanmode(x) = length(filter(!isnan,x))>0 ? StatsBase.mode(filter(!isnan,x)) : NaN
 nanmode(x,y) = mapslices(nanmode,x,dims=y)
+    
+## Nan mode filling with minimum or maximum
+fill_min_mean(x) = length(filter(!isnan,x))>0 ? mean(replace(x, NaN => minimum(filter(!isnan,x)))) : NaN
+fill_min_mean(x,y) = mapslices(fill_min_mean,x,dims=y)
+    
+fill_max_mean(x) = length(filter(!isnan,x))>0 ? mean(replace(x, NaN => maximum(filter(!isnan,x)))) : NaN
+fill_max_mean(x,y) = mapslices(fill_max_mean,x,dims=y)
 
 function get_information_by_car(days_per_repetition, number_of_cars, reads)
     # distance info    
@@ -52,12 +59,12 @@ function get_information_by_car(days_per_repetition, number_of_cars, reads)
 
     # Time info
     times = [reads[string("day",j)][2][k]  for j in 1:days_per_repetition, k in 1:number_of_cars];
-    car_time_average = nanmean(times, 1)[:];
+    car_time_average = fill_max_mean(times, 1)[:];
     car_time_mode = nanmode(round.(times, digits=2), 1)[:];
     
     # Speed info
     speeds = distances ./ times;
-    car_speed_average = nanmean(speeds, 1)[:];
+    car_speed_average = fill_min_mean(speeds, 1)[:];
     car_speed_mode = nanmode(round.(speeds, digits=2), 1)[:];
     
     return car_speed_average, car_speed_mode, car_time_average, car_time_mode, car_distance_average, car_distance_mode
@@ -71,12 +78,12 @@ function get_information_by_day(days_per_repetition, number_of_cars, reads)
 
     # Time info
     times = [reads[string("day",j)][2][k]  for j in 1:days_per_repetition, k in 1:number_of_cars];
-    day_time_average = nanmean(times, 2);
+    day_time_average = fill_max_mean(times, 2);
     day_time_mode = nanmode(round.(times, digits=2), 2);
         
     # Speed info
     speeds = distances ./ times;
-    day_speed_average = nanmean(speeds, 2);
+    day_speed_average = fill_min_mean(speeds, 2);
     day_speed_mode = nanmode(round.(speeds, digits=2), 2);
 
     # NaN proportion
